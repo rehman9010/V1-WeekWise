@@ -1,9 +1,9 @@
 <!-- AI CITATION: OpenAI Codex (GPT-6), 2026-11-01, from SPEC.md v1.0; reviewed by: pending -->
-# WeekWise study guide – through M2
+# WeekWise study guide – through M3
 
 Start with `models.py`, then `gaps.py`, `database.py`, the importers and calendar export.
 Read `app.py`, `ui_components.py` and `views/week.py` last to see how those pieces are displayed.
-Later ranking and machine-learning modules are not implemented yet.
+The baseline scorer is implemented; later ranking and machine-learning training are still pending.
 
 `# Course:` comments identify concepts using only the reference codes in CLAUDE.md §8.
 They are reading aids, not claims that third-party calendar internals were taught in the course.
@@ -53,3 +53,41 @@ Next read one exported ICS file: it represents one occurrence, uses a stable UID
 before folding, and converts Zurich wall time to UTC. The import round trip recognizes that UID.
 Understand why unknown IDs must remain busy after a database reset. Calendar parsing and download
 errors do not expose a private link; fallback is visible in the UI.
+
+## M3: follow one planning decision
+
+Start with the new profile queries in `database.py`. `complete_onboarding()` validates before
+writing and creates the user, focus and completion settings in one transaction. Favorite targets
+are checked with fixed SQL because one favorite table refers to three possible target tables.
+
+Next trace an activity through `heuristic_score()`, `score_events()` and `filter_suggestions()`.
+Focus changes rank; it does not exclude events from other directions. A favorite matches at
+series, club or bundle level independently, with a capped combined bonus. Filters use OR, so a
+favorite remains visible alongside activities in a separately chosen bundle.
+
+Finally follow Details → Confirm → full rerun → recomputed gaps. `save_interaction()` checks
+both the previous state and the clock before writing. The same occurrence can be cancelled and
+confirmed again without creating another interaction row. Its export UID remains stable.
+Known exports stay recognized after cancellation, so an old external feed entry cannot undo the
+local cancellation. Unknown IDs still become ordinary busy blocks.
+
+| File | Functions to study | Concept | Course reference |
+| --- | --- | --- | --- |
+| `database.py` | `complete_onboarding`, `update_user_profile`, `get_user_profile` | atomic writes, joins, set-valued preferences | A07, L04 |
+| `database.py` | `add_favorite`, `remove_favorite` | reference validation, idempotent operations | A07 |
+| `database.py` | `save_interaction`, `_validate_transition` | state machines, time bounds, rejecting invalid actions | L03, A06, A07 |
+| `database.py` | `get_known_event_ids` | set membership for export deduplication | L04 |
+| `friends.py` | `generate_friend_code` | seeded random choices, sets and bounded retries | U02 s5, U03 s1 |
+| `recommender.py` | `heuristic_score`, `favorite_boost` | explicit formula, capped contributions | L02, L03 |
+| `recommender.py` | `Recommender.score_events`, `filter_suggestions` | objects, stable sorting, OR semantics | L05, A05, L04 |
+| `views/onboarding.py` | focus/calendar validation, `_finish` | staged input, state, validation before persistence | L04, A04 |
+| `views/settings.py` | `_profile_settings`, `render_settings` | reusable controls and saved preferences | L04 |
+| `ui_components.py` | `render_event_card`, `render_gap_suggestions` | slicing top three, remaining dropdown options | U03 s5, L04 |
+| `ui_components.py` | `show_event_dialog`, `render_queued_dialog` | one queued dialog, reruns after writes | L04; Streamlit behavior per CLAUDE §9 |
+| `views/week.py` | `_week_contents`, `_render_grid`, `_render_beyond` | composition of pure logic and UI | L04, L05 |
+| `tests/test_profiles.py` | profile, favorite, transition and cancelled-export tests | isolated fixtures and boundary assertions | A07, U05 s2 |
+| `tests/test_recommender.py` | formula, boost caps, ordering and OR filters | deterministic unit tests | L02, A05 |
+
+Attendance/rating transitions are covered at the database layer, but their UI and model training
+remain M4 work. The M3 scorer deliberately rejects a supplied trained model rather than silently
+ignoring it.
