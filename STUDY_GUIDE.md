@@ -91,3 +91,16 @@ local cancellation. Unknown IDs still become ordinary busy blocks.
 Attendance/rating transitions are covered at the database layer, but their UI and model training
 remain M4 work. The M3 scorer deliberately rejects a supplied trained model rather than silently
 ignoring it.
+
+## M4 – training and feedback (in progress)
+
+| File | Functions to study | Concept | Course reference |
+| --- | --- | --- | --- |
+| `recommender.py` | `event_feature_row`, `to_feature_matrix` | explicit features, one-hot encoding and column alignment | L02, A08, A10 |
+| `recommender.py` | `build_training_data`, `train_production_model` | chronological history, leakage prevention, weights and Random Forest | L02, U03 s1, A10 |
+| `database.py` | `get_pending_feedback`, `get_training_interactions_df` | joins, state and time filters | A07 |
+| `database.py`, `ui_components.py` | `get_rating_cache_key`, `cached_recommender` | change detection, bounded resource caching | L04 |
+| `friends.py` | `friends_going_counts` | sharing-aware aggregate query | A07 |
+
+M4 extends the M3 scorer to accept a fitted model. The heuristic remains the fallback for fewer
+than 50 training rows or a single label class.
