@@ -92,7 +92,7 @@ Attendance/rating transitions are covered at the database layer, but their UI an
 remain M4 work. The M3 scorer deliberately rejects a supplied trained model rather than silently
 ignoring it.
 
-## M4 – training and feedback (in progress)
+## M4 – training and feedback
 
 | File | Functions to study | Concept | Course reference |
 | --- | --- | --- | --- |
@@ -101,6 +101,20 @@ ignoring it.
 | `database.py` | `get_pending_feedback`, `get_training_interactions_df` | joins, state and time filters | A07 |
 | `database.py`, `ui_components.py` | `get_rating_cache_key`, `cached_recommender` | change detection, bounded resource caching | L04 |
 | `friends.py` | `friends_going_counts` | sharing-aware aggregate query | A07 |
+| `synthetic_data.py` | `create_synthetic_users`, `_weighted_events`, `_synthetic_rating` | private seeded RNG, bounded sampling, hidden tastes and noisy labels | U02 s5, U03 s1, L02 |
+| `synthetic_data.py` | `create_demo_history`, `create_showcase_friends` | compose calendar gaps with generated history; idempotent setup | L03, L05 |
+| `ui_components.py` | `render_feedback_widget`, `prepare_feedback_popup`, `show_feedback_dialog` | attendance state machine, 0-based stars, one dialog per run, session state | L03, L04 |
+| `database.py` | `clear_demo_history`, `reset_database`, `remove_incomplete_synthetic_seed` | targeted deletion, foreign-key order, preserving genuine data during upgrades | A07 |
+| `tests/test_training.py`, `tests/test_synthetic_data.py` | leakage, weighting, repeatability and same-gap top-three tests | isolated fixtures and meaningful model assertions | A07, A08, A10 |
 
 M4 extends the M3 scorer to accept a fitted model. The heuristic remains the fallback for fewer
 than 50 training rows or a single label class.
+
+Follow a new rating end to end: Streamlit returns 0–4 → add one → `save_interaction` validates
+attendance and stars → rating count/revision changes → full rerun → cached model trains once →
+cards score current events. A corrected rating changes the revision even when the count stays
+constant. A no-show changes attendance but contributes no training row.
+
+Evaluation and held-out train/validation/test splitting belong to M6. M4's production forest fits
+all eligible rows; its tests check behavior without presenting synthetic-data accuracy as evidence
+of real-world recommendation quality.

@@ -2,7 +2,7 @@
 # WeekWise
 
 WeekWise is an HSG course project for finding activities that fit around a student's calendar.
-This checkout implements **M1 data, M2 calendar/gaps and the M3 planning MVP**. The interface uses
+This checkout implements **M1–M4: data, calendar/gaps, planning, ML and feedback**. The interface uses
 English and Europe/Zurich local time.
 
 ## Run
@@ -20,21 +20,25 @@ to refresh dependencies there, use `uv pip install --python .venv/bin/python -r 
 Windows users can use the Conda commands in CLAUDE.md or the equivalent `.venv\Scripts` paths.
 
 The first page run creates SQLite, 480 Unisport occurrences, 60 UniClubs events, 30 city events,
-and the demo calendar. No account, URL or network is needed. Restarting preserves occurrence IDs.
+the demo calendar, and 60 synthetic profiles with preferences and feedback. No account, URL or
+network is needed. Restarting preserves occurrence IDs and your local profile.
 The demo is anchored to the Monday of the first-start week and contains four past and eight
-current/future weeks. Past demo occurrences remain stored for later M4 history generation;
-automatic historical cleanup is deferred until that milestone.
+current/future weeks. After generating histories, unreferenced past occurrences are cleaned up;
+events with interactions or invitations remain available.
 
 ## First use and planning
 
 Complete the three-step welcome flow: read the introduction, enter a display name and select
 at least one focus direction, then use the demo calendar, test your HTTPS link, or upload an ICS
 file. A changed link must be tested again before Finish. Invalid input shows a friendly fallback
-message and you can explicitly choose Demo. The demo-history checkbox is inactive until M4.
+message and you can explicitly choose Demo. **Load demo history** is optional and checked by
+default: it adds sample attendance/ratings, up to two pending feedback events and three demo friends.
 
-The Week page ranks fitting activities with the specified focus/favorite heuristic. It shows
-three suggestions per gap and a **More options** dropdown for the rest. Scores are a baseline,
-not trained model probabilities. Open **Details** to favorite a course/series, club or category.
+The Week page ranks fitting activities with a seeded Random Forest trained on attended ratings.
+It shows three suggestions per gap and a **More options** dropdown for the rest. Match scores use
+the probability of a positive rating plus capped favorite boosts. With fewer than 50 ratings or
+only one label class, a visible baseline uses focus and favorites. Open **Details** to favorite
+a course/series, club or category.
 
 Choose **Confirm** to block that occurrence and remove conflicting suggestions. The dialog then
 offers **Download .ics**, **Add to Google Calendar**, **Add to Outlook**, and any source or
@@ -48,7 +52,14 @@ the top three. **Layout → Day** provides a wide single-day view. **Beyond your
 off-site, trip, multi-day and outside-window events with an explicit unchecked-calendar warning.
 
 Use **Settings & About → Profile** to edit your name and focus, or **Calendar** to change inputs
-and privacy switches. The profile, favorites and confirmations survive a new session.
+and privacy switches. The profile, favorites, confirmations and ratings survive a new session.
+
+After an activity ends, answer **Attended? → ✓ / ✗** in the week or the **How was it?** popup.
+If you attended, choose 1–5 stars. A saved rating updates suggestions once and shows a toast.
+No-shows are excluded from training; your genuine ratings have weight five, demo ratings weight one.
+Change a rating in **Details**. The popup shows at most five oldest unanswered activities;
+**Later** or closing it hides it until the next session. Settings → Profile offers **Clear my
+demo history**, enabled by a confirmation checkbox; genuine feedback is retained.
 
 ## Calendar and privacy
 
@@ -69,8 +80,8 @@ Private calendar blocks and titles are never saved to SQLite or source import lo
 cache entries live only in memory and expire after five minutes. Only public activity records
 are stored. Do not share secret calendar links in issues or commit private source files.
 
-Model training, attendance/rating UI, Rankings and Friends pages belong to later milestones.
-The interaction state machine already validates all states; M3 exposes confirm/cancel only.
+The own API, Rankings/model comparison and full Friends/invitation UI remain later milestones.
+M4 includes private-calendar-independent demo friend data and sharing-aware friend counts.
 
 ## Tests and demo tools
 
@@ -81,19 +92,23 @@ The interaction state machine already validates all states; M3 exposes confirm/c
 ```
 
 The tests use fixed clocks, in-memory SQLite and temporary fixtures. HTTP is mocked.
-`synthetic_data.py` regenerates placeholder sources and imports them; it does not reset a user's
-database or remove their history. Source importers default to local placeholder files. See
+**Stop the app before running `synthetic_data.py`: this command resets SQLite, including your
+local profile and history, and regenerates the full demo.** Normal app startup upgrades M3 data
+without resetting it. Remembered files in `data/private/` are retained by the reset.
+Source importers default to local placeholder files. See
 `sources.example.json` for the optional private configuration shape; real feeds are task R.
 
 The current environment's additional AppTest check is stored outside the checkout at
-`/workspace/weekwise-tools/check_m3_app.py`. It exercises the actual Streamlit script with a
-temporary fresh database and rejects unexpected network calls. It covers onboarding, dialog
-actions, filters, navigation, settings, a second session and privacy. AppTest requests whole
-scripts, so the harness requeues the open dialog before testing a dialog widget action.
+`/workspace/weekwise-tools/check_m4_app.py` and `check_m4_regression.py`. They exercise the actual
+Streamlit script with temporary fresh databases and reject unexpected network calls. They cover
+onboarding with/without demo history, feedback and its five-event limit, exact retrain counts,
+rating corrections, deletion, confirm/export/cancel, favorites, filters, navigation and privacy.
+AppTest requests whole scripts, so the harness requeues an open event dialog before testing its
+widget actions. Native browser fragment behavior and visual layout still merit team review.
 
 ## Review
 
-Read [MILESTONE_M3.md](MILESTONE_M3.md) for the acceptance results and remaining Google/Outlook
+Read [MILESTONE_M4.md](MILESTONE_M4.md) for the acceptance results and remaining Google/Outlook
 team checks, [STUDY_GUIDE.md](STUDY_GUIDE.md) for the course mapping, and
 [AI_USAGE.md](AI_USAGE.md) for the generation record.
 

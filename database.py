@@ -202,7 +202,8 @@ SELECT e.id, e.series_id, e.start_time, e.end_time, e.end_is_estimated, e.status
  JOIN bundles b ON b.id=s.bundle_id JOIN directions d ON d.id=b.direction_id
  LEFT JOIN clubs c ON c.id=s.club_id
  JOIN interactions i ON i.event_id=e.id
- WHERE i.user_id=? AND i.status='confirmed' AND e.start_time<? AND e.end_time>?
+ WHERE i.user_id=? AND i.status IN ('confirmed','attended','not_attended')
+ AND e.start_time<? AND e.end_time>?
  ORDER BY e.start_time
 '''
 
@@ -429,7 +430,7 @@ def get_import_log_df(connection):
 
 
 def get_calendar_confirmations(connection, start, end):
-    """Read current-user confirmations overlapping the week without storing private entries."""
+    """Read current-user plans and feedback overlapping the week, excluding cancellations."""
     user_id = get_setting(connection, 'current_user_id')
     return pd.read_sql(CONFIRMED_EVENTS_SQL, connection, index_col=['id'],
                        params=(user_id, to_db_text(end), to_db_text(start)))
@@ -462,18 +463,23 @@ def _require_user(connection, user_id):
     return row
 
 
-def _create_user(connection, display_name, now, is_synthetic, sharing_opt_in):
+def _create_user(connection, display_name, now, is_synthetic, sharing_opt_in,
+                 friend_code=None, rng=None):
     """Insert a validated profile inside the caller's transaction."""
     existing = connection.execute('SELECT friend_code FROM users').fetchall()
-    code = friends.generate_friend_code({row['friend_code'] for row in existing},
-                                        random.Random(config.RANDOM_SEED))
+    codes = {row['friend_code'] for row in existing}
+    rng = rng or random.Random(config.RANDOM_SEED)
+    code = friend_code or friends.generate_friend_code(codes, rng)
+    if code in codes or len(code) != config.FRIEND_CODE_LENGTH or not code.isalnum():
+        raise ValueError('Friend code must be unique and contain six letters or digits.')
     cursor = connection.execute('''INSERT INTO users
         (display_name,friend_code,is_synthetic,sharing_opt_in,created_at) VALUES (?,?,?,?,?)
         ''', (display_name, code, int(is_synthetic), int(sharing_opt_in), to_db_text(now)))
     return cursor.lastrowid
 
 
-def create_user(connection, display_name, is_synthetic=False, sharing_opt_in=False, now=None):
+def create_user(connection, display_name, is_synthetic=False, sharing_opt_in=False, now=None,
+                friend_code=None, rng=None):
     """Create a user with a generated friend code and return the new ID.
 
     :param connection: open SQLite connection
@@ -481,12 +487,14 @@ def create_user(connection, display_name, is_synthetic=False, sharing_opt_in=Fal
     :param is_synthetic: mark a generated rather than local user
     :param sharing_opt_in: explicit permission to share plans, false by default
     :param now: injected local creation time
+    :param friend_code: fixed showcase code, or None for a generated code
+    :param rng: private seeded generator used by synthetic data
     :return: new user ID
     """
     name = models.UserProfile(None, display_name, '', []).display_name
     with connection:
         return _create_user(connection, name, config.local_now(now),
-                            is_synthetic, sharing_opt_in)
+                            is_synthetic, sharing_opt_in, friend_code, rng)
 
 
 def get_current_user_id(connection):
@@ -528,7 +536,8 @@ def update_user_profile(connection, user_id, display_name, direction_keys):
         _set_user_directions(connection, user_id, profile.directions)
 
 
-def complete_onboarding(connection, display_name, direction_keys, calendar_mode, now=None):
+def complete_onboarding(connection, display_name, direction_keys, calendar_mode, now=None,
+                         load_demo_history=False):
     """Create the local profile and all non-secret onboarding settings atomically.
 
     :param connection: open SQLite connection
@@ -536,6 +545,7 @@ def complete_onboarding(connection, display_name, direction_keys, calendar_mode,
     :param direction_keys: nonempty focus selection
     :param calendar_mode: validated demo, link or upload mode; never a secret URL
     :param now: injected local creation time
+    :param load_demo_history: persist the optional demo choice so startup can finish it safely
     :return: newly created local user ID
     """
     profile = validate_profile(display_name, direction_keys)
@@ -548,7 +558,8 @@ def complete_onboarding(connection, display_name, direction_keys, calendar_mode,
                                config.local_now(now), False, False)
         _set_user_directions(connection, user_id, profile.directions)
         for key, value in (('current_user_id', str(user_id)), ('calendar_mode', calendar_mode),
-                           ('onboarding_done', '1')):
+                           ('onboarding_done', '1'),
+                           ('demo_history_requested', str(int(load_demo_history)))):
             connection.execute('''INSERT INTO app_settings (key,value) VALUES (?,?)
                 ON CONFLICT(key) DO UPDATE SET value=excluded.value''', (key, value))
     return user_id
@@ -644,7 +655,7 @@ def _validate_transition(event, previous, action, rating, now):
         raise ValueError('Use the rate action to save a rating.')
 
 
-def save_interaction(connection, user_id, event_id, action, rating=None, now=None):
+def save_interaction(connection, user_id, event_id, action, rating=None, now=None, is_demo=False):
     """Apply one validated state transition and return the saved interaction.
 
     :param connection: open SQLite connection
@@ -653,6 +664,7 @@ def save_interaction(connection, user_id, event_id, action, rating=None, now=Non
     :param action: confirm, cancel, attended, not_attended or rate
     :param rating: integer 1–5 only for rate
     :param now: injected naive Zurich clock
+    :param is_demo: mark a newly created local demo row; never relabel existing genuine history
     :return: interaction dictionary; rejected actions leave storage unchanged
     """
     now = config.local_now(now)
@@ -665,6 +677,9 @@ def save_interaction(connection, user_id, event_id, action, rating=None, now=Non
         previous = get_interaction(connection, user_id, event_id)
         _validate_transition(event, previous, action, rating, now)
         _write_interaction(connection, user_id, event_id, action, rating, previous, now)
+        if previous is None and is_demo:
+            connection.execute('UPDATE interactions SET is_demo=1 WHERE user_id=? AND event_id=?',
+                               (user_id, event_id))
         if action == 'rate' and previous['rating'] != rating:
             _advance_rating_revision(connection)
     return get_interaction(connection, user_id, event_id)
@@ -767,3 +782,61 @@ def clear_demo_history(connection, user_id):
         if rated:
             _advance_rating_revision(connection)
     return removed
+
+
+def get_synthetic_users_df(connection):
+    """Read generated profiles in stable creation order for deterministic demo generation."""
+    return pd.read_sql('SELECT * FROM users WHERE is_synthetic=1 ORDER BY id', connection,
+                       index_col=['id'])
+
+
+def get_favorite_target_ids(connection):
+    """List existing series and clubs in stable order for generated favorite choices."""
+    series = connection.execute('SELECT id FROM series ORDER BY id').fetchall()
+    clubs = connection.execute('SELECT id FROM clubs ORDER BY id').fetchall()
+    return {'series': [row['id'] for row in series], 'club': [row['id'] for row in clubs]}
+
+
+def remove_incomplete_synthetic_seed(connection):
+    """Remove an interrupted seed only, preserving every local profile and interaction."""
+    if get_setting(connection, 'synthetic_setup_done') == '1':
+        raise ValueError('A complete synthetic dataset must not be removed during startup.')
+    with connection:
+        connection.execute('''DELETE FROM invitations WHERE sender_id IN
+            (SELECT id FROM users WHERE is_synthetic=1) OR recipient_id IN
+            (SELECT id FROM users WHERE is_synthetic=1)''')
+        connection.execute('''DELETE FROM friendships WHERE user_id IN
+            (SELECT id FROM users WHERE is_synthetic=1) OR friend_id IN
+            (SELECT id FROM users WHERE is_synthetic=1)''')
+        connection.execute('''DELETE FROM interactions WHERE user_id IN
+            (SELECT id FROM users WHERE is_synthetic=1)''')
+        connection.execute('''DELETE FROM favorites WHERE user_id IN
+            (SELECT id FROM users WHERE is_synthetic=1)''')
+        connection.execute('''DELETE FROM user_directions WHERE user_id IN
+            (SELECT id FROM users WHERE is_synthetic=1)''')
+        connection.execute('DELETE FROM users WHERE is_synthetic=1')
+
+
+def reset_database(connection):
+    """Reset generated/local database state only when explicitly regenerating the demo.
+
+    Private calendar/source files are outside SQLite and are never touched here. Startup upgrades
+    do not call this function; the command-line demo regeneration is an explicit reset operation.
+    """
+    with connection:
+        connection.executescript('''
+            DROP TABLE IF EXISTS import_log;
+            DROP TABLE IF EXISTS app_settings;
+            DROP TABLE IF EXISTS invitations;
+            DROP TABLE IF EXISTS friendships;
+            DROP TABLE IF EXISTS interactions;
+            DROP TABLE IF EXISTS favorites;
+            DROP TABLE IF EXISTS user_directions;
+            DROP TABLE IF EXISTS users;
+            DROP TABLE IF EXISTS events;
+            DROP TABLE IF EXISTS series;
+            DROP TABLE IF EXISTS clubs;
+            DROP TABLE IF EXISTS bundles;
+            DROP TABLE IF EXISTS directions;
+        ''')
+    init_db(connection)
