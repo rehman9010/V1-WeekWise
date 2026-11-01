@@ -1,0 +1,436 @@
+{
+  "_meta": {
+    "version": 1,
+    "frozen": true,
+    "ai_citation": "OpenAI Codex (GPT-6), 2026-11-01; taxonomy transcribed from SPEC 8.2; review pending"
+  },
+  "directions": [
+    {
+      "key": "sports",
+      "name": "Sports",
+      "sort_order": 1
+    },
+    {
+      "key": "leisure",
+      "name": "Leisure",
+      "sort_order": 2
+    },
+    {
+      "key": "career",
+      "name": "Career",
+      "sort_order": 3
+    }
+  ],
+  "bundles": [
+    {
+      "key": "sports_ball",
+      "direction": "sports",
+      "name": "Ball & team sports",
+      "is_other": false,
+      "sort_order": 1,
+      "keywords": [
+        "football",
+        "soccer",
+        "futsal",
+        "basketball",
+        "volleyball",
+        "beach volleyball",
+        "handball",
+        "floorball",
+        "unihockey",
+        "uhu",
+        "rugby",
+        "hockey",
+        "ultimate",
+        "frisbee",
+        "baseball"
+      ]
+    },
+    {
+      "key": "sports_racket",
+      "direction": "sports",
+      "name": "Racket sports",
+      "is_other": false,
+      "sort_order": 2,
+      "keywords": [
+        "tennis",
+        "badminton",
+        "squash",
+        "table tennis",
+        "padel",
+        "ping pong"
+      ]
+    },
+    {
+      "key": "sports_endurance",
+      "direction": "sports",
+      "name": "Running & endurance",
+      "is_other": false,
+      "sort_order": 3,
+      "keywords": [
+        "running",
+        "run",
+        "jogging",
+        "marathon",
+        "cycling",
+        "spinning",
+        "rowing",
+        "triathlon",
+        "swimming",
+        "swim",
+        "endurance"
+      ]
+    },
+    {
+      "key": "sports_fitness",
+      "direction": "sports",
+      "name": "Fitness & strength",
+      "is_other": false,
+      "sort_order": 4,
+      "keywords": [
+        "fitness",
+        "gym",
+        "unigym",
+        "strength",
+        "functional",
+        "bootcamp",
+        "hiit",
+        "circuit",
+        "weightlifting",
+        "bodyweight",
+        "core"
+      ]
+    },
+    {
+      "key": "sports_mindbody",
+      "direction": "sports",
+      "name": "Yoga & mind-body",
+      "is_other": false,
+      "sort_order": 5,
+      "keywords": [
+        "yoga",
+        "pilates",
+        "meditation",
+        "stretching",
+        "mobility",
+        "tai chi",
+        "qigong",
+        "breathwork"
+      ]
+    },
+    {
+      "key": "sports_dance",
+      "direction": "sports",
+      "name": "Dance & cheer",
+      "is_other": false,
+      "sort_order": 6,
+      "keywords": [
+        "dance",
+        "dancing",
+        "salsa",
+        "bachata",
+        "zumba",
+        "hip hop",
+        "ballet",
+        "cheerleading",
+        "cheer",
+        "swing"
+      ]
+    },
+    {
+      "key": "sports_combat",
+      "direction": "sports",
+      "name": "Combat & self-defence",
+      "is_other": false,
+      "sort_order": 7,
+      "keywords": [
+        "boxing",
+        "kickboxing",
+        "judo",
+        "karate",
+        "taekwondo",
+        "self-defence",
+        "self-defense",
+        "krav maga",
+        "wrestling",
+        "fencing"
+      ]
+    },
+    {
+      "key": "sports_outdoor",
+      "direction": "sports",
+      "name": "Outdoor & climbing",
+      "is_other": false,
+      "sort_order": 8,
+      "keywords": [
+        "climbing",
+        "bouldering",
+        "hiking",
+        "ski",
+        "skiing",
+        "snowboard",
+        "outdoor",
+        "trail",
+        "kayak",
+        "sailing"
+      ]
+    },
+    {
+      "key": "sports_other",
+      "direction": "sports",
+      "name": "Other sports",
+      "is_other": true,
+      "sort_order": 9,
+      "keywords": []
+    },
+    {
+      "key": "leisure_music_arts",
+      "direction": "leisure",
+      "name": "Music & arts",
+      "is_other": false,
+      "sort_order": 10,
+      "keywords": [
+        "concert",
+        "music",
+        "choir",
+        "band",
+        "orchestra",
+        "jazz",
+        "theatre",
+        "theater",
+        "art",
+        "painting",
+        "photography",
+        "film",
+        "cinema",
+        "open mic"
+      ]
+    },
+    {
+      "key": "leisure_culture",
+      "direction": "leisure",
+      "name": "Culture & languages",
+      "is_other": false,
+      "sort_order": 11,
+      "keywords": [
+        "culture",
+        "cultural",
+        "language",
+        "tandem",
+        "international",
+        "museum",
+        "exhibition",
+        "literature",
+        "reading"
+      ]
+    },
+    {
+      "key": "leisure_social",
+      "direction": "leisure",
+      "name": "Socials & parties",
+      "is_other": false,
+      "sort_order": 12,
+      "keywords": [
+        "social",
+        "party",
+        "karaoke",
+        "raclette",
+        "fondue",
+        "drinks",
+        "apero",
+        "apéro",
+        "dinner",
+        "brunch",
+        "bbq",
+        "mixer",
+        "pub",
+        "quiz night"
+      ]
+    },
+    {
+      "key": "leisure_games",
+      "direction": "leisure",
+      "name": "Games & gaming",
+      "is_other": false,
+      "sort_order": 13,
+      "keywords": [
+        "gaming",
+        "esports",
+        "board game",
+        "poker",
+        "chess",
+        "video game",
+        "lan"
+      ]
+    },
+    {
+      "key": "leisure_trips",
+      "direction": "leisure",
+      "name": "Trips & excursions",
+      "is_other": false,
+      "sort_order": 14,
+      "keywords": [
+        "trip",
+        "excursion",
+        "tour",
+        "weekend trip",
+        "journey"
+      ]
+    },
+    {
+      "key": "leisure_community",
+      "direction": "leisure",
+      "name": "Volunteering & community",
+      "is_other": false,
+      "sort_order": 15,
+      "keywords": [
+        "volunteer",
+        "volunteering",
+        "charity",
+        "sustainability",
+        "community",
+        "fundraising",
+        "environment"
+      ]
+    },
+    {
+      "key": "leisure_other",
+      "direction": "leisure",
+      "name": "Other leisure",
+      "is_other": true,
+      "sort_order": 16,
+      "keywords": []
+    },
+    {
+      "key": "career_finance",
+      "direction": "career",
+      "name": "Finance & investing",
+      "is_other": false,
+      "sort_order": 17,
+      "keywords": [
+        "finance",
+        "investment",
+        "investing",
+        "hedge fund",
+        "asset management",
+        "banking",
+        "private equity",
+        "trading",
+        "stocks",
+        "valuation",
+        "portfolio",
+        "wealth"
+      ]
+    },
+    {
+      "key": "career_consulting",
+      "direction": "career",
+      "name": "Consulting & strategy",
+      "is_other": false,
+      "sort_order": 18,
+      "keywords": [
+        "consulting",
+        "consultant",
+        "case",
+        "case study",
+        "strategy"
+      ]
+    },
+    {
+      "key": "career_tech",
+      "direction": "career",
+      "name": "Tech & data",
+      "is_other": false,
+      "sort_order": 19,
+      "keywords": [
+        "tech",
+        "technology",
+        "data",
+        "ai",
+        "artificial intelligence",
+        "coding",
+        "programming",
+        "software",
+        "python",
+        "analytics",
+        "blockchain"
+      ]
+    },
+    {
+      "key": "career_entrepreneurship",
+      "direction": "career",
+      "name": "Entrepreneurship & startups",
+      "is_other": false,
+      "sort_order": 20,
+      "keywords": [
+        "startup",
+        "start-up",
+        "founder",
+        "entrepreneur",
+        "entrepreneurship",
+        "venture",
+        "pitch",
+        "innovation"
+      ]
+    },
+    {
+      "key": "career_networking",
+      "direction": "career",
+      "name": "Company events & networking",
+      "is_other": false,
+      "sort_order": 21,
+      "keywords": [
+        "company presentation",
+        "networking",
+        "recruiting",
+        "career fair",
+        "career",
+        "alumni",
+        "panel",
+        "fireside chat"
+      ]
+    },
+    {
+      "key": "career_skills",
+      "direction": "career",
+      "name": "Skills & workshops",
+      "is_other": false,
+      "sort_order": 22,
+      "keywords": [
+        "workshop",
+        "cv",
+        "interview",
+        "public speaking",
+        "negotiation",
+        "leadership",
+        "debate",
+        "rhetoric",
+        "excel"
+      ]
+    },
+    {
+      "key": "career_other",
+      "direction": "career",
+      "name": "Other career",
+      "is_other": true,
+      "sort_order": 23,
+      "keywords": []
+    }
+  ],
+  "club_category_to_direction": {
+    "Sports": "sports",
+    "Business": "career",
+    "Academic": "career",
+    "Arts": "leisure",
+    "Cultural": "leisure",
+    "Social": "leisure"
+  },
+  "event_type_to_direction": {
+    "Career": "career",
+    "Social": "leisure",
+    "Trip": "leisure"
+  },
+  "event_type_to_bundle": {
+    "Trip": "leisure_trips"
+  }
+}

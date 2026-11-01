@@ -1,0 +1,11 @@
+# AI CITATION: OpenAI Codex (GPT-6), 2026-11-01; review pending
+.venv/
+__pycache__/
+*.pyc
+data/weekwise.sqlite
+data/private/
+data/snapshots/
+data/demo/
+data/sources/*_placeholder.*
+.streamlit/secrets.toml
+.DS_Store
