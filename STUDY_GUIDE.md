@@ -1,9 +1,10 @@
-<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-02, M5, SPEC.md v1.0; review pending -->
-# WeekWise study guide – through M3
+<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-02, M6, SPEC.md v1.0; review pending -->
+# WeekWise study guide – through M6
 
-Start with `models.py`, then `gaps.py`, `database.py`, the importers and calendar export.
+Start with `models.py`, then `gaps.py`, `database.py`, `rankings.py`, `recommender.py`
+and calendar export. Read the importers when tracing source data into the database.
 Read `app.py`, `ui_components.py` and `views/week.py` last to see how those pieces are displayed.
-The baseline scorer is implemented; later ranking and machine-learning training are still pending.
+Both learned recommendations and the heuristic fallback are implemented, alongside evaluation.
 
 `# Course:` comments identify concepts using only the reference codes in CLAUDE.md §8.
 They are reading aids, not claims that third-party calendar internals were taught in the course.
@@ -88,9 +89,8 @@ local cancellation. Unknown IDs still become ordinary busy blocks.
 | `tests/test_profiles.py` | profile, favorite, transition and cancelled-export tests | isolated fixtures and boundary assertions | A07, U05 s2 |
 | `tests/test_recommender.py` | formula, boost caps, ordering and OR filters | deterministic unit tests | L02, A05 |
 
-Attendance/rating transitions are covered at the database layer, but their UI and model training
-remain M4 work. The M3 scorer deliberately rejects a supplied trained model rather than silently
-ignoring it.
+At the M3 checkpoint, attendance/rating transitions existed only at the database layer.
+M4 subsequently added their UI and model training, and extended the baseline-only scorer.
 
 ## M4 – training and feedback
 
@@ -115,7 +115,7 @@ attendance and stars → rating count/revision changes → full rerun → cached
 cards score current events. A corrected rating changes the revision even when the count stays
 constant. A no-show changes attendance but contributes no training row.
 
-Evaluation and held-out train/validation/test splitting belong to M6. M4's production forest fits
+Evaluation and held-out train/validation/test splitting are described in M6 below. Production fits
 all eligible rows; its tests check behavior without presenting synthetic-data accuracy as evidence
 of real-world recommendation quality.
 
@@ -141,3 +141,45 @@ result without another write. An unchanged duplicate confirmation remains invali
 Compare the public event row and its domain object: JSON timestamps remain Zurich local text;
 prices remain exact integer Rappen until `models.event_from_row` converts them to Decimal.
 The object-typed DataFrame prevents a nullable integer money column from being coerced to float.
+
+## M6 – rankings and model evaluation
+
+| File → function | Topic | Course |
+| --- | --- | --- |
+| `rankings.py` → `get_ranking`, `_append_filters` | Fixed SQL fragments, bound parameters, JOIN/GROUP BY/HAVING and ordering | A07 |
+| `rankings.py` → `category_overview` | LEFT JOIN, conditional COUNT/AVG and missing values | A07, A08 |
+| `rankings.py` → `plot_ranking`, `plot_category_overview` | Horizontal/grouped bars, numeric labels and returning Figures | A09 |
+| `recommender.py` → `_split_for_evaluation`, `evaluate_models` | Stratified 80/10/10 split, fixed seed and training-only RobustScaler | A11 |
+| `recommender.py` → `_comparison_models`, `_classification_metrics` | Five classifiers, macro averages, zero division and held-out reports | A10, A11 |
+| `recommender.py` → `feature_importances`, plot helpers | Sorting, pivoting, top-ten slices and chart interpretation | A08, A09 |
+| `database.py` → `get_training_summary`, `get_source_counts_df` | Reuse eligibility rules and count distinct series across occurrences | A07, A08 |
+| `ui_components.py` → `cached_evaluation`, `clear_data_caches`, `render_reset_controls` | Bounded caches, explicit invalidation and confirmation before destructive actions | L04 |
+| `app.py` → `initialize` | Detect frozen-taxonomy mismatch before modifying category data | L03, A07 |
+| `views/rankings.py` → `_category_choices`, `_ranking_pair` | Label-to-key mapping, tabs and anonymous tables | L04 |
+| `views/settings.py` → `_data_sources`, `_about_model`, `_about_weekwise` | Shared logic behind widgets, on-demand execution and readable evidence | L04 |
+| `tests/test_rankings.py`, `tests/test_evaluation.py` | Hand-calculated aggregates and tracing train/validation/test boundaries | A07, A10, A11 |
+
+For rankings, calculate the small fixture by hand. Alpha has two occurrences, six non-cancelled
+plans, four attendances but only three ratings. Its average is four stars. Bravo's two ratings
+average five but fail the All users minimum; a single local rating qualifies for You. Understand
+why grouping by series differs from grouping by occurrence, and why LEFT JOIN preserves empty
+directions. The overview uses the glossary's current `confirmed` status; Most popular additionally
+includes attended/no-show records. Missing averages remain null instead of becoming zero stars.
+
+For evaluation, follow one row through both stratified splits. Training, validation and test are
+disjoint. Only training rows fit the scaler or classifiers. Validation compares choices; the
+unscaled forest's test results use a separate untouched subset. The displayed evaluation forest
+is not the production model fitted on all data with sample weights. Macro metrics give equal
+weight to both labels, unlike accuracy's per-row averaging.
+
+`evaluate_models()` returns the required comparison DataFrame. Its `.attrs` contains plain
+serializable report values, split sizes and feature importances, so the UI does not need to fit
+another model or put a fitted object into a table. Small/one-class/rare-class inputs return an
+empty comparison with a reason. Feature importance describes association in this fitted forest;
+synthetic evaluation does not demonstrate accuracy on real students.
+
+Finally trace Settings → Data sources → Refresh: reimport, cleanup only unreferenced ended
+events, clear caches, rerun, show reports. Reset additionally requires a checkbox, drops tables in
+dependency order, closes the old cached connection, clears session state and regenerates the demo.
+Private calendar/source files are outside SQLite and survive. Tracked tabs use `.open` so model
+evaluation is never an accidental cost of editing the profile or calendar.

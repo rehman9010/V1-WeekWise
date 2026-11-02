@@ -1,8 +1,9 @@
-<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-02, M5, SPEC.md v1.0; review pending -->
+<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-02, M6, SPEC.md v1.0; review pending -->
 # WeekWise
 
 WeekWise is an HSG course project for finding activities that fit around a student's calendar.
-This checkout implements **M1–M5: data, calendar/gaps, planning, ML/feedback and the local API**.
+This checkout implements **M1–M6: data, calendar/gaps, planning, ML/feedback, the local API,
+rankings and model evaluation**.
 The interface uses English and Europe/Zurich local time.
 
 ## Run
@@ -110,8 +111,36 @@ Private calendar blocks and titles are never saved to SQLite or source import lo
 cache entries live only in memory and expire after five minutes. Only public activity records
 are stored. Do not share secret calendar links in issues or commit private source files.
 
-Rankings/model comparison and the full Friends/invitation UI remain later milestones.
+The full Friends/invitation UI remains M7 work.
 M4 includes private-calendar-independent demo friend data and sharing-aware friend counts.
+
+## Rankings and model evaluation
+
+**Rankings** compares You with All users (60 synthetic users plus you). Select all categories,
+a direction or a bundle, then choose Most popular, Most attended, Best rated or Most feedbacked.
+Rankings group activity series across dates; cancelled plans do not count. Best rated requires
+one rating for You and three for All users. **Show table** provides anonymous aggregate values.
+The category overview counts current confirmed plans and lists average attended ratings.
+
+**Settings & About → About the model** runs five classifiers both unscaled and with RobustScaler.
+It shows the ten-row validation comparison, a chart, Random Forest test metrics and classification
+report, and its ten most important features. The split is stratified 80/10/10 with seed 13;
+scaling fits training rows only. The unweighted evaluation forest fits only the training split.
+The separate production forest still uses all eligible rows, weighting genuine ratings fivefold.
+These synthetic-data scores illustrate the method and do not establish real-world accuracy.
+
+Evaluation runs only when its tab opens. New or edited ratings invalidate the cached result;
+ordinary reruns reuse it for up to one hour. Refresh and reset clear the model/evaluation caches.
+Insufficient data produces an explanation instead of invented scores.
+
+**Data sources** shows placeholder counts and import history. **Refresh event data** reimports
+all three sources, preserving referenced history and reporting failures per source. **Reset demo
+data** requires a confirmation checkbox: it removes your profile, favorites, plans and ratings,
+clears session/caches, rebuilds the demo and returns to onboarding. Remembered files in
+`data/private/` are retained. A changed taxonomy version offers this same explicit recovery.
+
+**About WeekWise** explains the project, sources and privacy, and displays/downloads `AI_USAGE.md`.
+The team label is currently “WeekWise project team”; individual member names were not supplied.
 
 ## Tests and demo tools
 
@@ -141,9 +170,16 @@ against temporary data, tests real GET/POST requests, failure/recovery, sidebar 
 HTTP-driven feedback/retraining. It requires port 5001 to be free and stops its API processes.
 Unit tests use Flask's test client and shared in-memory SQLite; they do not require network.
 
+`/workspace/weekwise-tools/check_m6_app.py` covers rankings, tracked tab selection, lazy evaluation,
+new/corrected rating invalidation, refresh failures, reset/re-onboarding and retained private files.
+AppTest does not expose a tab-selection method, so this harness sets the supported tab label in
+session state. It tests the actual tab body and widget actions; it is not a browser layout check.
+On a cloud host with a read-only home directory, prefix commands with
+`MPLCONFIGDIR=/tmp/weekwise-mpl XDG_CACHE_HOME=/tmp/weekwise-cache` for writable plotting caches.
+
 ## Review
 
-Read [MILESTONE_M5.md](MILESTONE_M5.md) for the acceptance results and remaining Google/Outlook
+Read [MILESTONE_M6.md](MILESTONE_M6.md) for the acceptance results and remaining Google/Outlook
 team checks, [STUDY_GUIDE.md](STUDY_GUIDE.md) for the course mapping, and
 [AI_USAGE.md](AI_USAGE.md) for the generation record.
 
