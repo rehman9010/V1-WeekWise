@@ -1,4 +1,4 @@
-<!-- AI CITATION: OpenAI Codex (GPT-6), 2026-11-01, from SPEC.md v1.0; reviewed by: pending -->
+<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-02, M5, SPEC.md v1.0; review pending -->
 # AI usage record
 
 | Date | Tool/model | Purpose | Output/files | Checks and team review |
@@ -8,6 +8,7 @@
 | 2026-11-01 | OpenAI Codex (GPT-6), M2 | Recover the foundation, implement calendar/gaps and verify the app | `calendar_import.py`, `calendar_export.py`, `gaps.py`, `views/week.py`, `ui_components.py`, `synthetic_data.py`, M1 foundation modules, `config.py`, `app.py`, `tests/*.py`, requirements, taxonomy, source example and project documentation | Current unit tests, isolated Streamlit AppTest and actual HTTP startup check; see `MILESTONE_M2.md`. Google/Outlook import and a real secret feed still require the team. |
 | 2026-11-01 | OpenAI Codex (GPT-6), M3 | Implement onboarding and the planning MVP | `app.py`, `config.py`, `database.py`, `recommender.py`, `friends.py` (code generation only), `calendar_import.py` documentation, `ui_components.py`, `views/onboarding.py`, `views/week.py`, `views/settings.py`, `tests/test_profiles.py`, `tests/test_recommender.py`, README, study guide and M3 report | 104 unit tests; isolated Streamlit flows for onboarding, favorites, filters, confirm/export/cancel, settings and session restoration; actual HTTP server startup. Team review pending; external Google/Outlook compatibility remains a manual check. |
 | 2026-11-01 | OpenAI Codex (GPT-6), M4 | Implement seeded users, trained recommendations and feedback | `app.py`, `config.py`, `database.py`, `friends.py`, `recommender.py`, `synthetic_data.py`, `ui_components.py`, `views/onboarding.py`, `views/week.py`, `views/settings.py`, `tests/test_training.py`, `tests/test_synthetic_data.py`, README, study guide, M4 report; external AppTest harnesses | 125 unit tests; isolated Streamlit feedback, cache and regression flows; actual HTTP server startup and shutdown. See `MILESTONE_M4.md`. No external calendar-service integration test; team review pending. |
+| 2026-11-02 | OpenAI Codex (GPT-6), M5 | Implement the local Flask API and resilient client | `api_server.py`, `api_client.py`, `database.py`, `config.py`, `ui_components.py`, `views/week.py`, `tests/test_api.py`, README, study guide, M5 report; external AppTest harnesses | 144 unit tests; offline feedback/planning regression; real local API GET/POST, stop/restart, sub-two-second fallback, exact retraining; actual API/Streamlit HTTP startup and shutdown. Team review pending. |
 
 The citation headers identify the actual coding agent as OpenAI Codex (GPT-6), rather than
 copying the Anthropic name in the specification's example. No team review is claimed: headers

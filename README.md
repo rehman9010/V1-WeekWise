@@ -1,9 +1,9 @@
-<!-- AI CITATION: OpenAI Codex (GPT-6), 2026-11-01, from SPEC.md v1.0; reviewed by: pending -->
+<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-02, M5, SPEC.md v1.0; review pending -->
 # WeekWise
 
 WeekWise is an HSG course project for finding activities that fit around a student's calendar.
-This checkout implements **M1–M4: data, calendar/gaps, planning, ML and feedback**. The interface uses
-English and Europe/Zurich local time.
+This checkout implements **M1–M5: data, calendar/gaps, planning, ML/feedback and the local API**.
+The interface uses English and Europe/Zurich local time.
 
 ## Run
 
@@ -25,6 +25,36 @@ network is needed. Restarting preserves occurrence IDs and your local profile.
 The demo is anchored to the Monday of the first-start week and contains four past and eight
 current/future weeks. After generating histories, unreferenced past occurrences are cleaned up;
 events with interactions or invitations remain available.
+
+## Optional local API
+
+Start the API in a second terminal, using the same environment and checkout:
+
+```bash
+.venv/bin/python api_server.py
+```
+
+It runs on `http://127.0.0.1:5001` with debug/reloading off and shares the app's SQLite file.
+It can start first: it prepares an empty schema, and the first Streamlit page run fills demo data.
+The sidebar shows **Event data: own API ✓** when available. Events, event details and interaction
+writes use HTTP; the app continues directly with SQLite when the API is unavailable.
+
+Health is cached for 30 seconds. A failed operation immediately switches the status to
+**Event data: database (API not running)** and suppresses retries for 30 seconds. A subsequent
+UI rerun after that interval discovers a restarted API. No background polling is required.
+
+| Method | Endpoint | Result |
+| --- | --- | --- |
+| GET | `/health` | Status and version |
+| GET | `/categories` | Directions, bundle lists and configured colors |
+| GET | `/events?from=2026-11-02&to=2026-11-09` | Events in `[from,to)`; optional `direction`, `bundle`, `source` filters |
+| GET | `/events/42` | One event, or JSON 404 |
+| POST | `/interactions` | JSON `user_id`, `event_id`, `action`, optional `rating`; stored row with HTTP 201 |
+
+Ranges use strict ISO dates and cover at most 120 days. Money is integer Rappen or null in JSON.
+Validation errors return JSON 400, unknown users/events JSON 404. API and database paths share
+the same interaction rules. A committed write with a lost response is recovered from SQLite
+without duplicating its transition or rating revision.
 
 ## First use and planning
 
@@ -80,7 +110,7 @@ Private calendar blocks and titles are never saved to SQLite or source import lo
 cache entries live only in memory and expire after five minutes. Only public activity records
 are stored. Do not share secret calendar links in issues or commit private source files.
 
-The own API, Rankings/model comparison and full Friends/invitation UI remain later milestones.
+Rankings/model comparison and the full Friends/invitation UI remain later milestones.
 M4 includes private-calendar-independent demo friend data and sharing-aware friend counts.
 
 ## Tests and demo tools
@@ -99,16 +129,21 @@ Source importers default to local placeholder files. See
 `sources.example.json` for the optional private configuration shape; real feeds are task R.
 
 The current environment's additional AppTest check is stored outside the checkout at
-`/workspace/weekwise-tools/check_m4_app.py` and `check_m4_regression.py`. They exercise the actual
-Streamlit script with temporary fresh databases and reject unexpected network calls. They cover
+`/workspace/weekwise-tools/check_m5_feedback.py` and `check_m5_regression.py`. They exercise the
+actual Streamlit script offline with temporary fresh databases. They cover
 onboarding with/without demo history, feedback and its five-event limit, exact retrain counts,
 rating corrections, deletion, confirm/export/cancel, favorites, filters, navigation and privacy.
 AppTest requests whole scripts, so the harness requeues an open event dialog before testing its
 widget actions. Native browser fragment behavior and visual layout still merit team review.
 
+`/workspace/weekwise-tools/check_m5_live.py` additionally starts/stops its own local Flask process
+against temporary data, tests real GET/POST requests, failure/recovery, sidebar status and
+HTTP-driven feedback/retraining. It requires port 5001 to be free and stops its API processes.
+Unit tests use Flask's test client and shared in-memory SQLite; they do not require network.
+
 ## Review
 
-Read [MILESTONE_M4.md](MILESTONE_M4.md) for the acceptance results and remaining Google/Outlook
+Read [MILESTONE_M5.md](MILESTONE_M5.md) for the acceptance results and remaining Google/Outlook
 team checks, [STUDY_GUIDE.md](STUDY_GUIDE.md) for the course mapping, and
 [AI_USAGE.md](AI_USAGE.md) for the generation record.
 

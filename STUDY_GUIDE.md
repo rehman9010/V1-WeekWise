@@ -1,4 +1,4 @@
-<!-- AI CITATION: OpenAI Codex (GPT-6), 2026-11-01, from SPEC.md v1.0; reviewed by: pending -->
+<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-02, M5, SPEC.md v1.0; review pending -->
 # WeekWise study guide – through M3
 
 Start with `models.py`, then `gaps.py`, `database.py`, the importers and calendar export.
@@ -118,3 +118,26 @@ constant. A no-show changes attendance but contributes no training row.
 Evaluation and held-out train/validation/test splitting belong to M6. M4's production forest fits
 all eligible rows; its tests check behavior without presenting synthetic-data accuracy as evidence
 of real-world recommendation quality.
+
+## M5 – local Web API and database fallback
+
+| File → function | Topic | Course |
+| --- | --- | --- |
+| `api_server.py` → `create_app`, route functions | HTTP verbs, paths, query parameters, JSON and status codes | L06, A06 |
+| `api_server.py` → `_open_connection`, `_close_connection`, `prepare_database` | Request resource lifetime and preserving startup initialization | A07 |
+| `api_server.py` → `_date_range`, `_interaction_body` | Input validation before a state change | L03, A06 |
+| `api_client.py` → `get_events`, `get_event`, `save_interaction` | Requests, bounded timeout, identical fallback behavior | L06, A06 |
+| `api_client.py` → `_fallback_interaction` | Recovering a committed write after a lost response | L06, A07 |
+| `database.py` → `get_event_records`, `get_events_df` | SQLite integers/nulls, exact Rappen and pandas dtype conversion | L02, A07, A08 |
+| `database.py` → `validate_interaction_input`, `save_interaction` | Shared validation instead of two different sets of rules | L03, A06 |
+| `ui_components.py` → `cached_api_available`, `load_events`, `save_user_interaction` | Cache keys, failure cooldown and visible origin | L04, L06 |
+| `tests/test_api.py` → route/client/connection tests | In-memory fixtures, Flask test client and mocked transports | A06, A07 |
+
+Trace a confirmation: button → API client → POST JSON → Flask input checks → shared SQLite state
+machine → HTTP 201 → UI rerun. If the API is down, the client applies that same state machine
+directly. If the API committed but its response was lost, a changed matching row supplies the
+result without another write. An unchanged duplicate confirmation remains invalid.
+
+Compare the public event row and its domain object: JSON timestamps remain Zurich local text;
+prices remain exact integer Rappen until `models.event_from_row` converts them to Decimal.
+The object-typed DataFrame prevents a nullable integer money column from being coerced to float.
