@@ -1,9 +1,9 @@
-<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-02, M6, SPEC.md v1.0; review pending -->
+<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-02, M7, SPEC.md v1.0; review pending -->
 # WeekWise
 
 WeekWise is an HSG course project for finding activities that fit around a student's calendar.
-This checkout implements **M1–M6: data, calendar/gaps, planning, ML/feedback, the local API,
-rankings and model evaluation**.
+This checkout implements **M1–M7: data, calendar/gaps, planning, ML/feedback, the local API,
+rankings, model evaluation and friends/invitations**.
 The interface uses English and Europe/Zurich local time.
 
 ## Run
@@ -111,8 +111,34 @@ Private calendar blocks and titles are never saved to SQLite or source import lo
 cache entries live only in memory and expire after five minutes. Only public activity records
 are stored. Do not share secret calendar links in issues or commit private source files.
 
-The full Friends/invitation UI remains M7 work.
-M4 includes private-calendar-independent demo friend data and sharing-aware friend counts.
+## Friends and invitations
+
+Open **Friends** to copy your friend-code message and add a friend. Codes ignore surrounding
+spaces and letter case. Try **LUCA26**; the demo-code expander also lists **SARA26** and **JONAS6**.
+Unknown, own and duplicate codes show clear errors. With demo history enabled, Lena, Noah and Mia
+are already connected and Lena/Noah have pending invitations. If you skipped history, start by
+adding a code. Codes and invitations operate within this installation's SQLite database.
+
+**Share my WeekWise plans with friends** is off by default. When enabled, friends can see your
+upcoming confirmed WeekWise activities. The switch also controls your inclusion in their
+friends-going names/counts. Private appointments never enter this shared view. Sending an
+invitation explicitly shares the selected activity, independently of sharing your overall plans.
+
+Pending invitations appear first among eligible gap suggestions, with an inviter badge. Category
+and favorite filters still apply. Every received invitation remains on Friends, including ones
+that overlap your calendar. **Accept** saves both the answer and confirmation together, then opens
+Details with ICS/Google/Outlook export. A displayed overlap is a warning; you can choose to accept.
+**Decline** changes only the invitation. Started/full/closed events cannot be accepted.
+
+For any confirmed future event, **Details → Invite friends → Send invitations** stores one
+invitation per selected friend and occurrence. Synthetic friends answer immediately: matching
+focus and no overlapping other confirmed plan means accepted, otherwise declined. Answers carry
+**(simulated)** labels; real recipients stay pending until they respond. Repeated sends reuse
+existing invitations and answers. Accepted demo plans immediately affect friends-going counts.
+
+Friends shows received/sent history and opted-in friends' upcoming plans with Details buttons.
+Event details also name the opted-in friends going. A sharing change takes effect on the next
+rerun; current friend counts feed suggestion features without forcing an extra model retrain.
 
 ## Rankings and model evaluation
 
@@ -174,12 +200,18 @@ Unit tests use Flask's test client and shared in-memory SQLite; they do not requ
 new/corrected rating invalidation, refresh failures, reset/re-onboarding and retained private files.
 AppTest does not expose a tab-selection method, so this harness sets the supported tab label in
 session state. It tests the actual tab body and widget actions; it is not a browser layout check.
+
+`/workspace/weekwise-tools/check_m7_app.py` tests the complete Friends flow on a fresh offline
+demo: pins/badges, codes, sharing, acceptance/export, simulated answers, duplicate sends, decline,
+non-fitting invitations, opt-out privacy and restored sessions. The M7 unit tests additionally
+force an invitation-write failure to verify that its confirmation rolls back too.
+
 On a cloud host with a read-only home directory, prefix commands with
 `MPLCONFIGDIR=/tmp/weekwise-mpl XDG_CACHE_HOME=/tmp/weekwise-cache` for writable plotting caches.
 
 ## Review
 
-Read [MILESTONE_M6.md](MILESTONE_M6.md) for the acceptance results and remaining Google/Outlook
+Read [MILESTONE_M7.md](MILESTONE_M7.md) for the acceptance results and remaining Google/Outlook
 team checks, [STUDY_GUIDE.md](STUDY_GUIDE.md) for the course mapping, and
 [AI_USAGE.md](AI_USAGE.md) for the generation record.
 

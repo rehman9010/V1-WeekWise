@@ -1,5 +1,5 @@
-<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-02, M6, SPEC.md v1.0; review pending -->
-# WeekWise study guide – through M6
+<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-02, M7, SPEC.md v1.0; review pending -->
+# WeekWise study guide – through M7
 
 Start with `models.py`, then `gaps.py`, `database.py`, `rankings.py`, `recommender.py`
 and calendar export. Read the importers when tracing source data into the database.
@@ -183,3 +183,49 @@ events, clear caches, rerun, show reports. Reset additionally requires a checkbo
 dependency order, closes the old cached connection, clears session state and regenerates the demo.
 Private calendar/source files are outside SQLite and survive. Tracked tabs use `.open` so model
 evaluation is never an accidental cost of editing the profile or calendar.
+
+## M7 – friends, sharing and invitations
+
+| File → function | Topic | Course |
+| --- | --- | --- |
+| `friends.py` → `add_friend`, `get_friends_df` | Normalizing codes, symmetric relationship rows and parameterized queries | U03 s1, L04, A07 |
+| `friends.py` → `set_sharing_opt_in`, `get_friend_plans_df`, `get_friends_going_df` | Explicit consent and filtering before data leaves storage | A07 |
+| `friends.py` → `send_invitations`, `_invitation_recipients` | Set membership, validating a whole batch and unique-key idempotence | L04, A07 |
+| `friends.py` → `simulate_friend_response` | Deterministic branching and strict interval overlap | L03, A07 |
+| `friends.py` → `respond_to_invitation`, `_answer_invitation` | Recipient checks, state transitions and one transaction for two writes | L03, A07 |
+| `database.py` → `save_interaction`, `apply_interaction_in_transaction` | Shared validation and caller-owned transactions | A07 |
+| `recommender.py` → `Recommender.score_events` | Stable tuple-key sorting: invited first, then descending score | A05, U03 s4 |
+| `ui_components.py` → `calendar_fit_message`, `render_invitation_response`, `_invite_controls` | Composition of calendar logic, saved state, reruns and export | L04, A06 |
+| `views/friends.py` → page helpers | Two-column UI, explicit privacy control and received/sent lists | L04 |
+| `views/week.py` → `render_week` | Load invitation metadata once and reuse it in each eligible gap | L04 |
+| `tests/test_friends.py` | Fixtures, failed-write rollback, time boundaries and privacy assertions | A07, U05 s2 |
+
+Begin with `add_friend`: normalize the submitted code, reject unknown/self/duplicate cases, then
+insert both directions in one transaction. The list of friends can show names even when sharing
+is off; their plans, presence names and friends-going counts are filtered by `sharing_opt_in`.
+Sharing is independent of an explicit invitation to one activity. No query accesses private
+calendar entries, which are never stored in SQLite.
+
+Trace a sent invitation: require the sender's confirmed future activity, validate all recipients,
+insert one row per recipient using a unique constraint, then evaluate synthetic responses. The
+simulation uses focus and other confirmed activity intervals. End equal to start is not overlap;
+the same already-confirmed event is excluded from the conflict query. It uses neither a private
+calendar nor a random draw. Human recipients keep their pending state.
+
+Trace Accept: check that the local user is the recipient, validate that confirmation is still
+allowed, open one transaction, confirm through the shared interaction state machine, then save
+the invitation answer. `apply_interaction_in_transaction` deliberately does not open/commit a
+nested context. SQLite connection contexts do not create nested savepoints: an inner commit
+could otherwise leave a plan behind when saving its answer fails. The test trigger proves both
+writes roll back. Ordinary `save_interaction` still owns and commits its own transaction.
+
+Invitations do not change numerical match scores. Sorting by `(is_invited(), score)` places
+pending invites first, retaining normal score order within each group. Only events already
+assigned to a fitting gap can appear there. Filters retain their OR semantics. The Friends page
+keeps non-fitting invitations visible and assesses the user's current calendar plus existing
+WeekWise plans without displaying private titles. Acceptance reuses the normal export dialog.
+
+The M4 showcase generator already supplies the three friends, fitting plans and two invitations;
+M7 connects them to real UI actions. A new or corrected rating still controls model retraining.
+Adding friends, changing sharing or answering invitations refreshes prediction-time social counts
+without claiming that a new model was trained.
