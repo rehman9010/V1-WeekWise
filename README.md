@@ -1,14 +1,32 @@
-<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-02, M7, SPEC.md v1.0; review pending -->
+<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-02, M8, SPEC.md v1.0; review pending -->
 # WeekWise
 
-WeekWise is an HSG course project for finding activities that fit around a student's calendar.
-This checkout implements **M1–M7: data, calendar/gaps, planning, ML/feedback, the local API,
-rankings, model evaluation and friends/invitations**.
+WeekWise helps HSG students fit sport, leisure and career activities around classes and private
+appointments. Offers are spread across different sources; manually comparing every activity with
+a calendar takes time. WeekWise finds free gaps, ranks suitable activities, exports confirmed
+plans and learns from attendance feedback.
+
+This checkout implements **M1–M8: data, calendar/gaps, planning, ML/feedback, the local API,
+rankings, model evaluation, friends/invitations and the reproducible acceptance check**.
+M8 has open external checks: native Windows/macOS runs, real-source review when inputs arrive,
+and manual Google/Outlook/browser verification. See [MILESTONE_M8.md](MILESTONE_M8.md).
 The interface uses English and Europe/Zurich local time.
 
 ## Run
 
-Python 3.11 is required. From the repository directory:
+Use Anaconda/Miniconda and Python 3.11. From the repository directory, on Windows (Anaconda
+Prompt), macOS or Linux:
+
+```bash
+conda create -n weekwise python=3.11
+conda activate weekwise
+python -m pip install -r requirements.txt
+python -m streamlit run app.py
+```
+
+Open the local URL printed by Streamlit, normally `http://localhost:8501`. Stop with `Ctrl+C`.
+Installation needs package downloads or a prepared package cache; the installed demo needs no
+external network. An alternative on macOS/Linux is:
 
 ```bash
 python3.11 -m venv .venv
@@ -18,7 +36,10 @@ python3.11 -m venv .venv
 
 The prepared cloud environment already has `.venv`. Its interpreter was installed with `uv`;
 to refresh dependencies there, use `uv pip install --python .venv/bin/python -r requirements.txt`.
-Windows users can use the Conda commands in CLAUDE.md or the equivalent `.venv\Scripts` paths.
+For Windows venv users: `py -3.11 -m venv .venv`, then
+`.venv\Scripts\python -m pip install -r requirements.txt` and
+`.venv\Scripts\python -m streamlit run app.py`. The commands below use `python` from an activated
+environment; replace it with the venv interpreter if you have not activated one.
 
 The first page run creates SQLite, 480 Unisport occurrences, 60 UniClubs events, 30 city events,
 the demo calendar, and 60 synthetic profiles with preferences and feedback. No account, URL or
@@ -32,7 +53,7 @@ events with interactions or invitations remain available.
 Start the API in a second terminal, using the same environment and checkout:
 
 ```bash
-.venv/bin/python api_server.py
+python api_server.py
 ```
 
 It runs on `http://127.0.0.1:5001` with debug/reloading off and shares the app's SQLite file.
@@ -111,6 +132,24 @@ Private calendar blocks and titles are never saved to SQLite or source import lo
 cache entries live only in memory and expire after five minutes. Only public activity records
 are stored. Do not share secret calendar links in issues or commit private source files.
 
+To connect Google Calendar, open its web settings, select your calendar, then **Integrate
+calendar → Secret address in iCal format**. Paste that address into WeekWise's **My calendar
+link**, select **Test link**, then **Use calendar** (or **Finish** during onboarding). This does
+not require making the calendar public. If your account hides the secret address, use
+**Import & export → Export**, unzip the download and upload the desired `.ics` file instead.
+
+For Outlook on the web, look under **Settings → Calendar → Shared calendars → Publish a
+calendar**. If your account permits publishing, use its **ICS** link, not the HTML viewing link.
+Publishing makes the chosen details accessible to anyone with that URL; choose the permitted
+detail level and keep the link private. If institutional policy disables publishing, export/save
+an `.ics` file from your calendar application and use WeekWise's upload option. Provider menu
+names can differ by account and version. Uploads are snapshots and need replacing after changes.
+
+To check export compatibility, confirm an activity and download its `.ics`. Import it into a
+temporary Google or Outlook calendar, checking title, date and Europe/Zurich time against Details.
+Also check **Add to Google Calendar** / **Add to Outlook** before saving the composed entry.
+WeekWise supplies links and files; saving in the provider remains your action.
+
 ## Friends and invitations
 
 Open **Friends** to copy your friend-code message and add a friend. Codes ignore surrounding
@@ -171,49 +210,110 @@ The team label is currently “WeekWise project team”; individual member names
 ## Tests and demo tools
 
 ```bash
-.venv/bin/python -m unittest discover -s tests -v
-.venv/bin/python synthetic_data.py
-.venv/bin/python importers.py
+python -m unittest discover -s tests -v
+python -m views.check_demo
+python importers.py
 ```
 
-The tests use fixed clocks, in-memory SQLite and temporary fixtures. HTTP is mocked.
-**Stop the app before running `synthetic_data.py`: this command resets SQLite, including your
+Unit tests use fixed clocks, in-memory SQLite and temporary fixtures. HTTP is mocked there.
+`python -m views.check_demo` runs the M8 acceptance scenario using the actual Streamlit scripts,
+a temporary fresh database and the fixed Zurich clock **2026-11-02 10:00**. It blocks external
+requests and starts/stops its own Flask process on a free loopback port. It verifies onboarding,
+feedback, suggestions/conflicts, filters, navigation, rankings, friends, model evaluation,
+real HTTP GET/POST, API fallback, source refresh and a restored session. It captures the actual
+ICS export and checks the Google compose URL. Existing local data and private files are untouched.
+
+The runner lives in `views/` to respect the Streamlit import boundary; neither test helper is a
+registered page. Run it through `views.check_demo`, which sets temporary paths before importing
+modules with default path arguments. AppTest reruns whole scripts, so dialogs are requeued;
+tracked tabs use their session-state labels. This checks UI handlers and chart output, while
+browser layout and external calendar-provider behavior still need manual review.
+
+`.github/workflows/check.yml` defines fresh Python 3.11 installations, dependency checks, unit
+tests and this scenario on Linux, Windows and macOS. It runs on push, pull request or manual
+dispatch. A committed workflow is not evidence of a successful native run; see the milestone
+report for the platforms actually tested.
+
+**Stop the app before running `python synthetic_data.py`: this command resets SQLite, including your
 local profile and history, and regenerates the full demo.** Normal app startup upgrades M3 data
 without resetting it. Remembered files in `data/private/` are retained by the reset.
-Source importers default to local placeholder files. See
-`sources.example.json` for the optional private configuration shape; real feeds are task R.
-
-The current environment's additional AppTest check is stored outside the checkout at
-`/workspace/weekwise-tools/check_m5_feedback.py` and `check_m5_regression.py`. They exercise the
-actual Streamlit script offline with temporary fresh databases. They cover
-onboarding with/without demo history, feedback and its five-event limit, exact retrain counts,
-rating corrections, deletion, confirm/export/cancel, favorites, filters, navigation and privacy.
-AppTest requests whole scripts, so the harness requeues an open event dialog before testing its
-widget actions. Native browser fragment behavior and visual layout still merit team review.
-
-`/workspace/weekwise-tools/check_m5_live.py` additionally starts/stops its own local Flask process
-against temporary data, tests real GET/POST requests, failure/recovery, sidebar status and
-HTTP-driven feedback/retraining. It requires port 5001 to be free and stops its API processes.
-Unit tests use Flask's test client and shared in-memory SQLite; they do not require network.
-
-`/workspace/weekwise-tools/check_m6_app.py` covers rankings, tracked tab selection, lazy evaluation,
-new/corrected rating invalidation, refresh failures, reset/re-onboarding and retained private files.
-AppTest does not expose a tab-selection method, so this harness sets the supported tab label in
-session state. It tests the actual tab body and widget actions; it is not a browser layout check.
-
-`/workspace/weekwise-tools/check_m7_app.py` tests the complete Friends flow on a fresh offline
-demo: pins/badges, codes, sharing, acceptance/export, simulated answers, duplicate sends, decline,
-non-fitting invitations, opt-out privacy and restored sessions. The M7 unit tests additionally
-force an invitation-write failure to verify that its confirmation rolls back too.
+Source importers default to local placeholder files. The original environment-specific M2–M7
+AppTest harnesses remain historical verification evidence; the committed M8 runner works without
+those external files. Unit tests also cover failure cases, privacy, time boundaries, model
+evaluation and forced transaction rollback.
 
 On a cloud host with a read-only home directory, prefix commands with
 `MPLCONFIGDIR=/tmp/weekwise-mpl XDG_CACHE_HOME=/tmp/weekwise-cache` for writable plotting caches.
 
-## Review
+## Real activity sources and taxonomy
 
-Read [MILESTONE_M7.md](MILESTONE_M7.md) for the acceptance results and remaining Google/Outlook
+No real Excel file or API credentials were supplied for M8. To integrate an input (task R):
+
+1. Put the original Unisport workbook at `data/sources/unisport.xlsx`. Inspect its headers and
+   map them to SPEC §7.2's canonical columns with `UNISPORT_COLUMN_MAPPING` in `config.py`.
+   Check weekday names, dates, times and the validity range; do not infer them from demo data.
+2. Copy `sources.example.json` to `data/private/sources.json` (create the directory if needed).
+   Enter the actual UniClubs/City HTTPS URLs and tokens there. Adapt `UNICLUBS_FIELD_MAPPING` /
+   `CITY_FIELD_MAPPING` after inspecting the actual payload; never put credentials in config.py.
+3. Run `python importers.py` or **Settings → Data sources → Refresh event data**. Review rows
+   read, skipped reasons, counts and origin. Fix mapping problems and retry. Successful API
+   inputs produce ignored local snapshots; failed sources fall back to stored inputs. Empty or
+   oversized live imports are rejected to preserve existing data.
+4. Review categories on the imported real series, especially **Other** (target below about 15%).
+   Add evidence-based keywords if needed. Taxonomy v1 keys are frozen: never rename/delete them;
+   additional bundles must be appended. Record any mapping/keyword changes and validation in
+   `AI_USAGE.md` and a task R report. No real-data accuracy claim follows from demo statistics.
+
+The sidebar counts actual placeholder series and synthetic users, so real imports can coexist
+with clearly labelled demo data. A taxonomy version mismatch stops normal startup and offers an
+explicit reset after review; it does not silently remap saved history.
+
+## Files and project structure
+
+| Path | Purpose |
+| --- | --- |
+| `app.py`, `views/*.py`, `ui_components.py` | App startup, four pages, onboarding and shared widgets/caches |
+| `models.py`, `gaps.py`, `categories.py` | Domain objects, interval logic and taxonomy assignment |
+| `database.py`, `importers.py`, `synthetic_data.py` | SQLite, source adapters and deterministic demo generation |
+| `calendar_import.py`, `calendar_export.py` | Private calendar parsing, ICS and provider links |
+| `recommender.py`, `rankings.py`, `friends.py` | Learning/evaluation, anonymous statistics and local social actions |
+| `api_server.py`, `api_client.py` | Optional local HTTP API and SQLite fallback |
+| `config.py`, `requirements.txt` | Shared settings and exact dependency pins |
+| `data/taxonomy.json` | Committed category keys and keyword rules |
+| `data/weekwise.sqlite` | Ignored local profile, activities, plans, ratings, friends and import logs |
+| `data/sources/`, `data/demo/` | Activity source files and generated demo calendar; generated files ignored |
+| `data/private/`, `data/snapshots/` | Ignored remembered calendar/source credentials and API snapshots |
+| `tests/`, `views/check_demo.py`, `views/demo_scenario.py` | Unit/rule tests and portable M8 acceptance runner |
+| `.github/workflows/check.yml` | Fresh-install CI matrix for Linux, Windows and macOS |
+
+Reset using **Settings → Data sources → I want to reset all WeekWise data → Reset demo data**.
+This deletes local app state and regenerates the demo; it retains remembered private files.
+Use **Calendar → Forget remembered calendar** to remove remembered calendar inputs separately.
+For a backup, stop the app/API first and copy your local data securely; a Git source archive
+contains neither your database nor private inputs. The M8 showcase trip appears in newly generated
+demo data; existing stored catalogues are preserved until an explicit demo reset.
+
+## Troubleshooting
+
+| Symptom | Check/action |
+| --- | --- |
+| Wrong Python or missing module | Run `python --version` (3.11), activate `weekwise`, reinstall `requirements.txt` with that interpreter, then `python -m pip check`. |
+| Streamlit port already used | Stop your earlier app process or run `python -m streamlit run app.py --server.port 8502`. |
+| API port 5001 already used | Stop your previous API process. The app works through SQLite while the API is off; wait 30 seconds and rerun after restarting it. |
+| Database locked | Stop extra app/API/importer processes and close database viewers, then retry. Keep the checkout in a writable local folder. Avoid deleting a live database, especially on Windows. |
+| Wrong calendar time | Compare the event with Europe/Zurich time; inspect the feed's timezone. Use a new `.ics` upload to rule out a stale provider feed. |
+| No activities in a week | Clear filters, select Today, and inspect **Data sources**. For an old demo window, back up first and explicitly reset the demo. |
+| Calendar link rejected | Use the ICS URL, Test link again after edits, or upload an `.ics`. See the visible fallback message; private URLs are deliberately omitted from errors. |
+| Test cannot bind a local port | Permit loopback sockets in your test environment; `views.check_demo` needs a disposable local API. Unit tests work without sockets. |
+
+## Team and review
+
+Read [MILESTONE_M8.md](MILESTONE_M8.md) for the final acceptance results and remaining platform/calendar
 team checks, [STUDY_GUIDE.md](STUDY_GUIDE.md) for the course mapping, and
-[AI_USAGE.md](AI_USAGE.md) for the generation record.
+[AI_USAGE.md](AI_USAGE.md) for the generation record. Team: **WeekWise project team**, HSG
+Fundamentals and Methods of Computer Science, autumn 2026. Individual member names were not
+provided. Code citations remain pending until the team reviews them; AI must be declared in the
+project video, whose voice-over must not be generated.
 
 After the cloud environment was replaced during the interrupted M2 turn, the checkout contained
 no application files or earlier commits. M1 was reconstructed from the unchanged specification

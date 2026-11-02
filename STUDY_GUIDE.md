@@ -1,5 +1,5 @@
-<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-02, M7, SPEC.md v1.0; review pending -->
-# WeekWise study guide – through M7
+<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-02, M8, SPEC.md v1.0; review pending -->
+# WeekWise study guide – through M8
 
 Start with `models.py`, then `gaps.py`, `database.py`, `rankings.py`, `recommender.py`
 and calendar export. Read the importers when tracing source data into the database.
@@ -229,3 +229,47 @@ The M4 showcase generator already supplies the three friends, fitting plans and 
 M7 connects them to real UI actions. A new or corrected rating still controls model retraining.
 Adding friends, changing sharing or answering invitations refreshes prediction-time social counts
 without claiming that a new model was trained.
+
+## M8 – trace and verify the complete app
+
+| File | Functions or section to study | Concept | Course reference |
+| --- | --- | --- | --- |
+| `synthetic_data.py`, `config.py` | `_club_rows`, `DEMO_TRIP_INDICES` | Deterministic fixtures that demonstrate a required branch | U02 s5, L03 |
+| `tests/test_synthetic_data.py` | `test_first_week_contains_a_future_trip` | A regression assertion about user-visible behavior | U05 s2 |
+| `database.py` | `get_demo_counts` | Independent aggregate queries avoid multiplying series by occurrence joins | A07 |
+| `ui_components.py` | `render_sidebar_status`, `render_filters` | Show data provenance and explain actual recommendation inputs | L04 |
+| `tests/test_data_status.py` | `DataStatusTests` | Empty, real-only and mixed-origin database fixtures | A07, U05 s2 |
+| `views/check_demo.py` | `isolate_paths`, `main` | Module loading and definition-time default arguments | U03 s2; test tooling explained below |
+| `views/demo_scenario.py` | `DemoScenario`, `check_week_and_confirm`, `refresh_and_restore` | TestCase inheritance, state changes, invariants and cleanup | U05 s2, L04, A07 |
+| `views/demo_scenario.py` | `check_export`, `check_api_and_fallback` | Calendar round trip, HTTP GET/POST and local fallback | A06, L06 |
+| `app.py`, `models.py` | `main`, `UserProfile` | Reviewed session-state and domain documentation | L04, L05 |
+| `.github/workflows/check.yml` | `fresh-install` matrix | Repeat installation and checks on three operating systems | Development tooling, not claimed course content |
+| `README.md`, `MILESTONE_M8.md`, `AI_USAGE.md` | Setup, acceptance evidence and limitations | Reproducibility, documentation and honest attribution | L02 project rules |
+
+Run `python -m views.check_demo`, then trace one confirmation from its button through the API
+client, database state machine, recomputed gaps and calendar export. The same interaction rules
+apply when the optional API process disappears. A new browser session restores profile/history
+from SQLite, but its popup state starts anew; therefore the event deferred with Later returns.
+
+The final scenario exposed a missing first-week Beyond example: the earlier trips all fell in
+other weeks. One of the existing three trips now starts on the first Saturday. The fix preserves
+the event count, uses the existing generator, and leaves saved user data alone. The unit test
+checks the resulting open, off-site occurrence; the scenario checks that the actual page shows it.
+
+Read `get_demo_counts` alongside the mixed-source test. A weekly course with several occurrences
+is still one placeholder series. Synthetic users are a separate reason to show Demo data even
+when all activity sources are real. Neither count depends on a user's private calendar.
+
+The portable runner is deliberately separate from network-free unit-test discovery. It imports
+Streamlit only under `views/`, but is never registered as a page. Temporary-directory paths must
+be installed **before** importing modules whose default parameters capture config paths. The
+runner rejects direct use of its scenario against the application's normal data directory.
+`unittest.mock`, AppTest, temporary directories, process/socket management and the CI workflow
+are test infrastructure extras, not newly claimed lecture topics. The subprocess exists only
+to test the optional API; the product gains no background scheduler. Startup polling is bounded
+and cleanup reaps the owned process and closes SQLite connections, including on assertion failures.
+
+For final review, explain why synthetic validation scores cannot establish real-world quality;
+why a passing Linux run does not prove Windows/macOS installation; and why inspecting a generated
+Google URL is different from checking the provider's browser UI. The M8 report records those
+boundaries and the still-needed real-source taxonomy review.
