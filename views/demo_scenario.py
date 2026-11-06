@@ -41,7 +41,8 @@ import ui_components
 # Test fixtures stay here; product thresholds and paths continue to come from config.
 NOW = datetime(2026, 11, 2, 10)
 ROOT = Path(__file__).resolve().parents[1]
-APP_TIMEOUT = 60
+# Native Windows runners can take over a minute to durably seed the fresh SQLite file.
+APP_TIMEOUT = 180
 SERVER_TIMEOUT = 60
 POLL_SECONDS = 0.05
 STOP_TIMEOUT = 5

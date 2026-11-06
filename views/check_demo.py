@@ -59,7 +59,7 @@ def main():
         from views import demo_scenario
         suite = unittest.defaultTestLoader.loadTestsFromTestCase(demo_scenario.DemoScenario)
         # Dump blocked test/app stacks before AppTest reaches its timeout.
-        faulthandler.dump_traceback_later(45, repeat=True)
+        faulthandler.dump_traceback_later(150)
         try:
             result = unittest.TextTestRunner(verbosity=2).run(suite)
         finally:
