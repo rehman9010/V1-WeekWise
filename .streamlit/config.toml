@@ -18,9 +18,13 @@ grayTextColor = "#ADBBCF"
 codeBackgroundColor = "#152238"
 
 [theme.sidebar]
-backgroundColor = "#192332"
-secondaryBackgroundColor = "#223148"
-textColor = "#E8EDF6"
+backgroundColor = "#C5A077"
+secondaryBackgroundColor = "#EBD8BB"
+textColor = "#243247"
 headingFont = "sans-serif"
-primaryColor = "#7297FF"
-borderColor = "#465267"
+primaryColor = "#244A7A"
+borderColor = "#8F6A45"
+
+blueTextColor = "#154A73"
+orangeTextColor = "#793B0D"
+violetTextColor = "#55316C"

@@ -294,3 +294,20 @@ local and require no external fonts, texture downloads or extra dependencies.
 
 Verify with `python -m unittest discover -s tests -v`, `python -m views.check_demo`,
 and `python -m streamlit run app.py`. Restart Streamlit after theme configuration changes.
+
+
+## Calendar-first wood revision (2026-11-06)
+
+- `calendar_layout.interval_layout` clips view intervals without changing stored events;
+  `_lane_group` reuses lanes for touching events and separates simultaneous ones
+  (L03, U03 s5). Tests cover exact offsets, nested overlaps and window edges.
+- `views/week._timetable_day` places native Streamlit containers with numeric CSS;
+  titles stay in native text widgets and never enter generated CSS (L04).
+- `views/week._choose_planning_day` selects the recommendations tab from a free-time
+  button; `_planning_tabs` keeps ideas separate from actual appointments (L04).
+- `ui_components.render_gap_suggestions` can lay out the same scored choices in three
+  columns without changing ranking, limits, invitation priority or event actions.
+
+The user's explicit request authorizes the stronger wood treatment and timed calendar
+layout. There is no JavaScript, new dependency or external texture/font request. The
+existing Day agenda remains available. Native help text respects busy-title privacy.

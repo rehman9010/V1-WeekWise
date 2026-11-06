@@ -336,3 +336,21 @@ in `assets/`. Restart the Streamlit process after changing theme configuration. 
 Streamlit Community Cloud, reboot the app if a saved theme or running process still
 shows the previous appearance. Browser verification covers desktop and mobile layouts;
 functional verification uses the same unit suite and isolated demo as before.
+
+
+### Calendar-first wood layout (2026-11-06)
+
+Week view is now a proportional 07:00–23:00 timetable: every day shares the same hour
+lines, overlapping appointments use separate lanes, and confirmed activities occupy
+their actual times. Free intervals are lightly shaded; click one to select its day in
+the activity workspace below. Ideas remain separate from confirmed calendar entries.
+The Week/Day switch is above the calendar, including on phones. The complete week
+scrolls within its wooden frame on narrow screens; Day retains the accessible agenda.
+All-day labels appear in the day headers. Fully off-window appointments remain
+available in the Outside 07:00–23:00 section. Hover the time's help icon for a complete
+private appointment title, unless Hide busy titles is enabled.
+
+Oak grain now appears on navigation, buttons, day headers and the calendar frame.
+The timetable uses light paper surfaces with dark text. Texture is a local SVG, not
+a downloaded image. `calendar_layout.py` owns clipping and collision lanes; pixel
+geometry comes from `config.py`. No events, exports, ratings or source data are changed.
