@@ -1,4 +1,4 @@
-<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-02, M8, SPEC.md v1.0; review pending -->
+<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-06, Navy & Oak design, SPEC.md v1.0; review pending -->
 # WeekWise
 
 WeekWise helps HSG students fit sport, leisure and career activities around classes and private
@@ -321,3 +321,18 @@ before M2 was completed. The current tests verify this reconstruction; it is not
 restoration of the earlier checkout. A source backup is also kept outside the checkout under
 `/workspace/weekwise-tools/`; it should be downloaded or otherwise preserved before replacing
 this environment again. Cross-environment restoration has not been verified.
+
+
+## Appearance: Navy & Oak
+
+The app uses a midnight-blue theme, blue controls, serif headings, a subtle oak-grain
+sidebar and softly shaded planning cards. The calendar legend stays on one row; days
+stack on small screens and the weekly grid scrolls within its own area when space is
+limited. Charts use matching dark backgrounds. Branding and textures are local, so the
+design works offline.
+
+The native theme is in `.streamlit/config.toml`; decorative styles and SVG branding are
+in `assets/`. Restart the Streamlit process after changing theme configuration. On
+Streamlit Community Cloud, reboot the app if a saved theme or running process still
+shows the previous appearance. Browser verification covers desktop and mobile layouts;
+functional verification uses the same unit suite and isolated demo as before.

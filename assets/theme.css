@@ -1,0 +1,118 @@
+/* AI CITATION: OpenAI Codex (GPT-6), 2026-11-06; user-requested Navy & Oak design.
+   Decorative presentation only; all controls remain native Streamlit widgets. */
+:root {
+  --ww-oak: #c7a477;
+  --ww-muted: #adbbcf;
+  --ww-surface: #142136;
+  --ww-shadow: 0 6px 22px rgb(0 0 0 / 14%);
+}
+[data-testid="stMainBlockContainer"] {
+  padding: 5.5rem 2.5rem 5rem;
+  max-width: 1800px;
+}
+[data-testid="stSidebar"] {
+  background-color: #192332;
+  background-image:
+    repeating-linear-gradient(92deg, transparent 0 17px, rgb(199 164 119 / 3%) 18px,
+      transparent 20px 39px),
+    repeating-linear-gradient(88deg, transparent 0 57px, rgb(199 164 119 / 4%) 59px,
+      transparent 62px 94px);
+  border-right: 2px solid rgb(199 164 119 / 45%);
+}
+[data-testid="stSidebarLogo"] { height: 2.75rem; max-width: 100%; }
+[data-testid="stSidebarNavLink"] {
+  border-radius: 0.6rem;
+  padding-top: 0.6rem;
+  padding-bottom: 0.6rem;
+}
+[data-testid="stSidebarNavLink"][aria-current="page"] {
+  background: #263c64;
+  box-shadow: inset 3px 0 #91adff;
+}
+[data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3 {
+  letter-spacing: 0.02em;
+}
+h1, h2 { letter-spacing: -0.025em; }
+[data-testid="stApp"] [data-testid="stCaptionContainer"] {
+  color: var(--ww-muted);
+  opacity: 1;
+}
+[data-testid="stApp"] [data-testid="stCaptionContainer"] p { color: var(--ww-muted); line-height: 1.55; }
+[data-testid="stMain"] button { transition: border-color 120ms ease, background 120ms ease; }
+[data-testid="stMain"] button[kind="primary"] {
+  background-color: #4169d8;
+  border-color: #4169d8;
+  color: #fff;
+}
+[data-testid="stMain"] button:focus-visible, [data-testid="stSidebar"] a:focus-visible {
+  outline: 2px solid #adc3ff;
+  outline-offset: 3px;
+}
+[class*="st-key-ww_day_card_"] {
+  background: var(--ww-surface);
+  border: 1px solid #35455b;
+  border-top: 1px solid rgb(199 164 119 / 55%);
+  box-shadow: var(--ww-shadow);
+  padding: 0.9rem 0.8rem;
+  margin-bottom: 0.35rem;
+}
+[class*="st-key-ww_day_card_"] [data-testid="stVerticalBlock"] { gap: 0.65rem; }
+[class*="st-key-ww_day_card_"] [data-testid="stText"] {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+[class*="st-key-ww_day_card_"] [data-testid="stMarkdownContainer"] p {
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+[class*="st-key-ww_day_card_"][class*="_busy_"] {
+  background: #101c2e;
+  border-top-color: #35455b;
+  box-shadow: none;
+}
+.st-key-ww_today_heading {
+  border-bottom: 2px solid #7297ff;
+  padding-bottom: 0.55rem;
+  margin-bottom: 0.3rem;
+}
+.st-key-ww_week_legend { padding-bottom: 1rem; }
+.st-key-ww_week_legend [data-testid="stHorizontalBlock"] { flex-wrap: wrap; gap: 0.7rem; }
+.st-key-ww_week_legend [data-testid="stColumn"] {
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 0;
+}
+.st-key-ww_week_navigation { border-bottom: 1px solid #2b3b53; padding-bottom: 1.2rem; }
+@media (min-width: 701px) {
+  .st-key-ww_week_grid > [data-testid="stLayoutWrapper"] > [data-testid="stHorizontalBlock"] {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    padding-bottom: 1rem;
+    scrollbar-color: #465e84 #101c2e;
+  }
+  .st-key-ww_week_grid > [data-testid="stLayoutWrapper"] > [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
+    min-width: 155px;
+  }
+}
+@media (max-width: 700px) {
+  [data-testid="stMainBlockContainer"] { padding: 5rem 1.1rem 3rem; }
+  h1 { font-size: 1.85rem; }
+  .st-key-ww_week_navigation [data-testid="stHorizontalBlock"] { flex-wrap: nowrap; }
+  .st-key-ww_week_navigation [data-testid="stColumn"] {
+    min-width: 0;
+    flex: 1 1 0;
+    width: auto;
+  }
+  .st-key-ww_week_navigation button { width: 100%; padding-inline: 0.3rem; }
+  .st-key-ww_week_grid > [data-testid="stLayoutWrapper"] > [data-testid="stHorizontalBlock"] { flex-direction: column; }
+  .st-key-ww_week_grid > [data-testid="stLayoutWrapper"] > [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
+    width: 100%;
+    flex: 1 1 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-testid="stMain"] button { transition: none; }
+}

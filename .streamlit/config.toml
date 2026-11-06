@@ -1,0 +1,26 @@
+# AI CITATION: OpenAI Codex (GPT-6), 2026-11-06; user-requested visual design; review pending
+[theme]
+base = "dark"
+primaryColor = "#7297FF"
+backgroundColor = "#0C1526"
+secondaryBackgroundColor = "#152238"
+textColor = "#E8EDF6"
+font = "sans-serif"
+headingFont = "serif"
+headingFontSizes = ["2.35rem", "1.85rem", "1.35rem"]
+headingFontWeights = [500, 500, 600]
+baseRadius = "0.8rem"
+buttonRadius = "0.55rem"
+borderColor = "#34445A"
+showWidgetBorder = true
+linkColor = "#A7C0FF"
+grayTextColor = "#ADBBCF"
+codeBackgroundColor = "#152238"
+
+[theme.sidebar]
+backgroundColor = "#192332"
+secondaryBackgroundColor = "#223148"
+textColor = "#E8EDF6"
+headingFont = "sans-serif"
+primaryColor = "#7297FF"
+borderColor = "#465267"

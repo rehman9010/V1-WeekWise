@@ -1,4 +1,4 @@
-<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-02, M8, SPEC.md v1.0; review pending -->
+<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-06, Navy & Oak design, SPEC.md v1.0; review pending -->
 # WeekWise study guide – through M8
 
 Start with `models.py`, then `gaps.py`, `database.py`, `rankings.py`, `recommender.py`
@@ -273,3 +273,24 @@ For final review, explain why synthetic validation scores cannot establish real-
 why a passing Linux run does not prove Windows/macOS installation; and why inspecting a generated
 Google URL is different from checking the provider's browser UI. The M8 report records those
 boundaries and the still-needed real-source taxonomy review.
+
+
+## Navy & Oak visual update (2026-11-06)
+
+The requested dark design uses Streamlit's native `.streamlit/config.toml` theme for
+colours, serif headings and sans-serif body text. `assets/theme.css` adds only the
+requested decorative texture, card shadows and responsive spacing. This is an explicit
+user-requested exception to the original no-custom-CSS convention; widgets, validation,
+calendar calculations and event handlers remain native. The SVG icon and wordmark are
+local and require no external fonts, texture downloads or extra dependencies.
+
+- `ui_components.apply_visual_design`: load static local presentation assets (U03 s2, L04).
+- `ui_components.render_chart`: style detached figures without changing plot data or global
+  Matplotlib defaults (A09).
+- `views/week._draw_day`: stable container keys connect decorative styling to day cards;
+  the index keeps keys unique even when private appointments share the same times (U03 s5).
+- `views/week.render_week`: a horizontal legend and scoped grid keep the week readable;
+  narrow screens stack days, while intermediate screens can scroll the calendar locally.
+
+Verify with `python -m unittest discover -s tests -v`, `python -m views.check_demo`,
+and `python -m streamlit run app.py`. Restart Streamlit after theme configuration changes.
