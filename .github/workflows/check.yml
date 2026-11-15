@@ -1,4 +1,4 @@
-# AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-15, UniClubs Task 6; review pending
+# AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-15, UniClubs Task 7; review pending
 name: WeekWise checks
 
 on:
@@ -36,3 +36,5 @@ jobs:
         run: python -m views.check_demo
       - name: Isolated UniClubs feed, calendar and private planning
         run: python -m views.check_uniclubs
+      - name: UniClubs offline cold start and process restart recovery
+        run: python -m views.check_uniclubs_recovery
