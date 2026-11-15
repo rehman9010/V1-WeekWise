@@ -1,0 +1,63 @@
+# AI CITATION: OpenAI Codex (GPT-6), 2026-11-15, user-approved UniClubs Task 5; review pending
+name: UniClubs public catalog
+
+on:
+  schedule:
+    # UTC; staggered away from the busiest minute at the beginning of the hour.
+    - cron: '17,47 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: uniclubs-public-catalog
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    if: >-
+      github.event.repository.fork == false &&
+      github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    env:
+      DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+      MPLBACKEND: Agg
+      MPLCONFIGDIR: /tmp/weekwise-mpl
+      XDG_CACHE_HOME: /tmp/weekwise-cache
+      NO_PROXY: 127.0.0.1,localhost
+    steps:
+      - name: Check out the latest default branch
+        # Official actions/checkout v4 tag, verified during setup.
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+      - name: Set up Python 3.11
+        # Official actions/setup-python v5 tag, verified during setup.
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Install the pinned project requirements
+        run: python -m pip install -r requirements.txt
+      - name: Test the catalog pipeline offline
+        run: python -m unittest discover -s tests -p 'test_uniclubs_*.py' -v
+      - name: Restore, verify, synchronize and export public events
+        run: python -m uniclubs_refresh
+      - name: Commit only the public event export
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add -- data/public/uniclubs_events.json
+          if git diff --cached --quiet -- data/public/uniclubs_events.json; then
+            echo 'The public export has not changed.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'chore(data): refresh UniClubs events [skip ci]' --only -- data/public/uniclubs_events.json
+          # A racing change to the branch causes a safe failure; never force-push.
+          git push origin "HEAD:${DEFAULT_BRANCH}"
