@@ -119,6 +119,24 @@ Die Cloud-Umgebung und ihre Konfiguration wurden für Task 5 nicht veröffentlic
   ausgeführt. Nur die öffentliche Datei wurde committed; eine andere vorbereitete Änderung
   wurde nicht mit veröffentlicht. Es wurde kein Forcepush verwendet.
 
-Diese lokalen Ergebnisse sind kein Nachweis eines GitHub-Laufs. Aktivierung setzt den Merge
-auf `main` voraus. Danach sind die Workflowdatei auf dem Defaultbranch, ein erfolgreicher
-GitHub-Lauf und der anonyme Abruf der oben genannten Raw-Adresse gesondert zu prüfen.
+Die lokalen Ergebnisse wurden anschließend durch die folgenden GitHub-Prüfungen ergänzt.
+
+## Aktivierung und GitHub-Nachweise
+
+- [Pull Request #1](https://github.com/rehman9010/V1-WeekWise/pull/1) wurde nach erfolgreichen
+  Prüfungen auf Linux, Windows und macOS nach `main` übernommen.
+- Die [plattformübergreifenden Prüfungen](https://github.com/rehman9010/V1-WeekWise/actions/runs/43743628434)
+  liefen auf allen drei Plattformen erfolgreich durch.
+- Der neue Workflow ist auf dem Defaultbranch vorhanden und wird von GitHub als **active** gemeldet.
+- Ein [manuell gestarteter echter GitHub-Lauf](https://github.com/rehman9010/V1-WeekWise/actions/runs/43743942246)
+  ist erfolgreich: Installation, 95 UniClubs-Tests, Wiederherstellung, Quellenabgleich, Export und
+  Bot-Commit/Push sind bestanden.
+- Ergebnis dieses Laufs: **0 neue, 0 geänderte und 49 unveränderte Events**.
+- Der [Bot-Commit](https://github.com/rehman9010/V1-WeekWise/commit/a4bc7b62a7f064af843fe7a70740c038eabb6cf7)
+  änderte nachweislich nur `data/public/uniclubs_events.json`.
+- Der öffentliche Feed wurde ohne Anmeldung abgerufen und mit demselben Formatvalidator geprüft:
+  **49 Events, 23 Clubs**, letzter erfolgreicher Quellenabgleich am 15.11.2026 um 18:57 Uhr Zurich.
+
+Der 30-Minuten-Zeitplan ist eingerichtet. Als tatsächlicher Ausführungsnachweis dient der
+manuelle GitHub-Lauf; ein durch cron gestarteter Lauf wurde während dieses Tasks noch nicht
+beobachtet. Die normale Streamlit-App verwendet den Feed erst nach Task 6.
