@@ -1,4 +1,4 @@
-<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-15, UniClubs Task 5; review pending -->
+<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-15, UniClubs Task 6; review pending -->
 # WeekWise study guide – through M8
 
 ## Separate UniClubs catalog – Task 2 (2026-11-15)
@@ -88,6 +88,37 @@ See [UNICLUBS_TASK_5.md](UNICLUBS_TASK_5.md) for the German walkthrough and acti
 Every successful run advances public observation times, so unchanged event details can still
 produce a JSON commit. The bot stages only the public file, and normal pushes refuse conflicts.
 The SQLite binary, private app data and full import logs are not published.
+
+## Streamlit source integration – Task 6 (2026-11-15)
+
+See [UNICLUBS_TASK_6.md](UNICLUBS_TASK_6.md) for the German walkthrough.
+
+- `uniclubs_feed.apply_public_snapshot`: validate JSON, compare source timestamps and identities,
+  then INSERT/UPDATE explicit public columns in one transaction (A07). It never restores over a
+  populated database or deletes personal tables.
+- `uniclubs_catalog.CatalogEvent`: inheritance converts source rows into existing calendar
+  objects. IDs have a source namespace; categories use the frozen taxonomy (U05 s2, L04).
+  Original UTC values remain in SQLite; `calendar_import.to_local_naive` owns Zurich conversion.
+- `uniclubs_user`: SQL stores only owner-scoped plan identities, state, feedback and favorites;
+  no source event metadata is copied into either the private or legacy event tables (A07).
+- `activity_sources`: small functions route source reads/writes and merge favorite sets,
+  confirmations and ratings. A generated private owner token survives profile edits but not
+  reset (U03 s2, L04; UUID generation is an explained standard-library addition).
+- `ui_components.cached_uniclubs_refresh`: cache a status dictionary, not a connection.
+  `render_uniclubs_status` uses native `st.fragment(run_every=60)` so idle sessions can notice
+  newer data. This timer is an explained addition for the user's automatic-update requirement;
+  it does not introduce threads, an application scheduler or a third-party component.
+- `views/week`: union date bounds and confirmation blocks, recompute free gaps, and retain
+  discoverability through the source list. Uncertain saved plan times suspend fit guarantees.
+- `calendar_export.make_uid`, `calendar_import._uid_event_id`: source-prefixed identifiers
+  survive date changes and remain distinct from the original positive integer markers.
+- `recommender.build_training_data`: optional private source examples join the existing
+  chronological batches, so own ratings and same-start peers do not leak into prior averages.
+  Genuine source feedback has weight five (A10/A11).
+
+Test infrastructure uses synthetic feeds, in-memory/temporary databases and actual Streamlit
+AppTest handlers. `views.check_demo` remains the isolated historical demo; `views.check_uniclubs`
+exercises the new source without external requests. Both are run by CI on all three platforms.
 
 Start with `models.py`, then `gaps.py`, `database.py`, `rankings.py`, `recommender.py`
 and calendar export. Read the importers when tracing source data into the database.
