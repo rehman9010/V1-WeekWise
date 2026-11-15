@@ -1,4 +1,4 @@
-<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-15, UniClubs Task 6; review pending -->
+<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-15, UniClubs Task 7; review pending -->
 # WeekWise
 
 WeekWise helps HSG students fit sport, leisure and career activities around classes and private
@@ -212,6 +212,8 @@ The team label is currently “WeekWise project team”; individual member names
 ```bash
 python -m unittest discover -s tests -v
 python -m views.check_demo
+python -m views.check_uniclubs
+python -m views.check_uniclubs_recovery
 python importers.py
 ```
 
@@ -312,16 +314,27 @@ guaranteed persistent store across Streamlit Community Cloud redeployments; the 
 can be rebuilt from GitHub. See [UNICLUBS_TASK_6.md](UNICLUBS_TASK_6.md) for behavior and tests.
 No new application package is required.
 
+Task 7 adds a separate recovery acceptance command, `python -m views.check_uniclubs_recovery`.
+It runs four fresh Python processes against the same disposable files: offline first start from
+the bundle, outage restart, malformed feed restart and older feed restart. Saved source identities,
+private plans/favorites, calendar exports and SQLite integrity must survive all four phases.
+The full checking workflow runs this command on Linux, Windows and macOS. See
+[UNICLUBS_TASK_7.md](UNICLUBS_TASK_7.md) for the final operating checks and the short demo guide.
+
 ## Real activity sources and taxonomy
 
-No real Excel file or API credentials were supplied for M8. To integrate an input (task R):
+The separate public UniClubs integration above needs no UniClubs account, API key or token.
+The following instructions cover additional Unisport/City inputs through the original importer;
+they are not setup steps for the separate UniClubs catalog. No real workbook or City credentials
+were supplied for M8. To integrate an additional input (task R):
 
 1. Put the original Unisport workbook at `data/sources/unisport.xlsx`. Inspect its headers and
    map them to SPEC §7.2's canonical columns with `UNISPORT_COLUMN_MAPPING` in `config.py`.
    Check weekday names, dates, times and the validity range; do not infer them from demo data.
 2. Copy `sources.example.json` to `data/private/sources.json` (create the directory if needed).
-   Enter the actual UniClubs/City HTTPS URLs and tokens there. Adapt `UNICLUBS_FIELD_MAPPING` /
-   `CITY_FIELD_MAPPING` after inspecting the actual payload; never put credentials in config.py.
+   Enter an actual City HTTPS URL and token there if that source requires them. Adapt
+   `CITY_FIELD_MAPPING` after inspecting the payload; never put credentials in config.py.
+   Leave the legacy UniClubs API setting empty when using the independent public catalog.
 3. Run `python importers.py` or **Settings → Data sources → Refresh event data**. Review rows
    read, skipped reasons, counts and origin. Fix mapping problems and retry. Successful API
    inputs produce ignored local snapshots; failed sources fall back to stored inputs. Empty or

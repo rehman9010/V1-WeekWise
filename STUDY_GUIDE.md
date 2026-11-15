@@ -1,4 +1,4 @@
-<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-15, UniClubs Task 6; review pending -->
+<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-15, UniClubs Task 7; review pending -->
 # WeekWise study guide – through M8
 
 ## Separate UniClubs catalog – Task 2 (2026-11-15)
@@ -119,6 +119,26 @@ See [UNICLUBS_TASK_6.md](UNICLUBS_TASK_6.md) for the German walkthrough.
 Test infrastructure uses synthetic feeds, in-memory/temporary databases and actual Streamlit
 AppTest handlers. `views.check_demo` remains the isolated historical demo; `views.check_uniclubs`
 exercises the new source without external requests. Both are run by CI on all three platforms.
+
+## Restart and failure acceptance – Task 7 (2026-11-15)
+
+See [UNICLUBS_TASK_7.md](UNICLUBS_TASK_7.md) for results and the short demo guide.
+
+- `views.check_uniclubs_recovery.RecoveryProcesses`: a loop starts four independent test
+  interpreters in sequence against one temporary directory; a failed phase stops the scenario.
+  `subprocess`, the timeout and the temporary marker guard are test infrastructure additions,
+  not new product background processes or claimed lecture topics.
+- `views.uniclubs_recovery_scenario.RecoveryScenario`: inheritance reuses the actual Task 6
+  Streamlit handler helpers and overrides only cold-start/restart assertions (U05 s2).
+- `assert_retained_state`, `catalog_document`, `assert_integrity`: JSON dictionaries describe the
+  expected public state; SQLite reads check plans, source IDs, foreign keys and owner separation
+  after each new process (L04, A07). The public bundle is the offline starting point, not a backup
+  of personal plans. File reads/writes use explicit UTF-8.
+
+Run `python -m views.check_uniclubs_recovery`. Explain why another session in one process can
+reuse cached values, while a fresh interpreter must reconstruct state from persisted SQLite/JSON.
+Distinguish a restart preserving local files from a deployment that replaces those files. The
+public feed restores the catalog; it does not restore personal ratings or plans from GitHub.
 
 Start with `models.py`, then `gaps.py`, `database.py`, `rankings.py`, `recommender.py`
 and calendar export. Read the importers when tracing source data into the database.
