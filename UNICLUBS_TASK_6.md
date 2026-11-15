@@ -1,6 +1,9 @@
 <!-- AI CITATION: OpenAI Codex (GPT-6), 2026-11-15, user-approved UniClubs Task 6; review pending -->
 # UniClubs – Task 6: Streamlit-Anbindung
 
+Status: abgeschlossen. Der Stand ist auf GitHub in `main` übernommen; eine öffentliche
+Streamlit-Instanz wurde in diesem Schritt nicht als Deployment geprüft.
+
 Der öffentliche GitHub-Feed ist mit dem bestehenden Streamlit-Programm verbunden. Die Events
 bleiben in der eigenen Datei `data/uniclubs.sqlite`; es werden keine UniClubs-Katalogzeilen in
 die bisherigen Tabellen `events`, `series` oder `clubs` kopiert.
@@ -136,6 +139,23 @@ MPLCONFIGDIR=/tmp/weekwise-mpl XDG_CACHE_HOME=/tmp/weekwise-cache MPLBACKEND=Agg
 Die beiden Abnahmeläufe verwenden isolierte temporäre Dateien und feste Uhren. Der historische
 Lauf prüft weiter sein unverändertes Offline-Demoszenario; der neue Lauf schaltet die Quelle ein
 und ersetzt ausschließlich den externen Feed durch kontrollierte Daten. Die CI führt beide aus.
+
+## GitHub-Nachweis
+
+- [Pull Request #2](https://github.com/rehman9010/V1-WeekWise/pull/2) wurde am 15. November 2026
+  nach erfolgreichen Prüfungen regulär nach `main` übernommen.
+- Der [Pull-Request-Prüflauf](https://github.com/rehman9010/V1-WeekWise/actions/runs/43748191502)
+  und der [Branch-Prüflauf](https://github.com/rehman9010/V1-WeekWise/actions/runs/43748164149)
+  bestanden jeweils vollständig auf Linux, Windows und macOS: frische Installation,
+  Paketkompatibilität, 357 Tests und beide Streamlit-Abnahmeläufe.
+- Merge-Commit: `9f3cd6ae6aa799b0a6b060d302f4582bc58f5fca`.
+- Es wurden keine SQLite-Dateien oder privaten Nutzerdaten hochgeladen. Der vorhandene
+  öffentliche JSON-Snapshot wurde durch diesen Code-Commit nicht überschrieben.
+- Der lokale Streamlit-HTTP-Healthcheck antwortet nach der Übernahme mit `ok`.
+
+Die Cloud-Umgebung wurde nicht veröffentlicht oder neu eingerichtet. Für die öffentlich
+laufende Streamlit-App ist hier keine verifizierte Deployment-Adresse hinterlegt; GitHub- und
+AppTest-Erfolg werden deshalb nicht als Nachweis eines dort abgeschlossenen Deployments gewertet.
 
 ## Betriebsgrenzen und nächster Schritt
 
