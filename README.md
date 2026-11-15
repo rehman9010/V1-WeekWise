@@ -1,4 +1,4 @@
-<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-15, UniClubs Task 5; review pending -->
+<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-15, UniClubs Task 6; review pending -->
 # WeekWise
 
 WeekWise helps HSG students fit sport, leisure and career activities around classes and private
@@ -245,7 +245,7 @@ evaluation and forced transaction rollback.
 On a cloud host with a read-only home directory, prefix commands with
 `MPLCONFIGDIR=/tmp/weekwise-mpl XDG_CACHE_HOME=/tmp/weekwise-cache` for writable plotting caches.
 
-## Separate UniClubs database and manual synchronization (Tasks 2–4)
+## Separate UniClubs database, automation and Streamlit (Tasks 2–6)
 
 The user-requested UniClubs catalog has its own SQLite file, `data/uniclubs.sqlite`.
 Create its empty tables from the repository directory with:
@@ -291,7 +291,26 @@ The JSON contains only public club/event fields, identities, observation times a
 markers. It retains known history; it contains no profiles, private calendars, descriptions,
 images, access codes or import-log history. A malformed existing snapshot stops the refresh.
 See [UNICLUBS_TASK_5.md](UNICLUBS_TASK_5.md) for recovery, verification and activation status.
-Streamlit catalog integration remains Task 6. No new application package is required.
+Streamlit now reads this feed into the separate catalog before rendering the week. The sidebar
+shows the publisher's source time separately from the last download check. An open session checks
+once a minute; shared network results are cached for five minutes. The download resolves the
+public GitHub branch ref before fetching its immutable commit URL, with a conservative Raw fallback.
+An older, malformed or unavailable feed leaves the last good catalog available. A bundled public
+snapshot also supports startup without a successful external request.
+
+The week merges these events with the other sources in Python. **UniClubs this week** lists all
+source events, including closed or unplaceable listings. Source-specific favorites, confirmations,
+cancellations, attendance and ratings are routed to ignored `data/private/uniclubs_user.sqlite`.
+Their `uniclubs:<source ID>` identities never enter the old event table. Source plans occupy the
+calendar and remove conflicting gaps; source ratings enter production training with genuine-user
+weight. Stable ICS identifiers survive rescheduling and cancellation. Organiser cancellations,
+missing source rows and uncertain/program times have distinct labels.
+
+UniClubs plans are not shared through the existing Friends/invitation feature. They belong to the
+current local WeekWise profile. As with the original SQLite app, local personal state is not a
+guaranteed persistent store across Streamlit Community Cloud redeployments; the public catalog
+can be rebuilt from GitHub. See [UNICLUBS_TASK_6.md](UNICLUBS_TASK_6.md) for behavior and tests.
+No new application package is required.
 
 ## Real activity sources and taxonomy
 
