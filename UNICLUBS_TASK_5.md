@@ -137,6 +137,12 @@ Die lokalen Ergebnisse wurden anschließend durch die folgenden GitHub-Prüfunge
 - Der öffentliche Feed wurde ohne Anmeldung abgerufen und mit demselben Formatvalidator geprüft:
   **49 Events, 23 Clubs**, letzter erfolgreicher Quellenabgleich am 15.11.2026 um 18:57 Uhr Zurich.
 
+Der aktualisierte Stand wurde zusätzlich über die commit-spezifische Raw-Adresse des Bot-Commits
+bestätigt. GitHubs normale Raw-Adresse liefert `Cache-Control: max-age=300` und gab bei der Prüfung
+teilweise noch den vorherigen gültigen Snapshot zurück. Die spätere Streamlit-Anbindung muss daher
+den Erfolgszeitpunkt anzeigen und die Cache-/Aktualitätsprüfung berücksichtigen; Veröffentlichung
+im Repository und sofortige Auslieferung durch einen CDN-Cache sind getrennte Beobachtungen.
+
 Der 30-Minuten-Zeitplan ist eingerichtet. Als tatsächlicher Ausführungsnachweis dient der
 manuelle GitHub-Lauf; ein durch cron gestarteter Lauf wurde während dieses Tasks noch nicht
 beobachtet. Die normale Streamlit-App verwendet den Feed erst nach Task 6.
