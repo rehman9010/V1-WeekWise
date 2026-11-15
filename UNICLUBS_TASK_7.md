@@ -1,8 +1,9 @@
 <!-- AI CITATION: OpenAI Codex (GPT-6), 2026-11-15, user-approved UniClubs Task 7; review pending -->
 # UniClubs – Task 7: Gesamtabnahme und Betriebsanleitung
 
-Status: Die abschließenden lokalen und GitHub-Prüfungen werden hier mit ihrem tatsächlichen
-Ergebnis dokumentiert. Eine öffentliche Streamlit-Adresse ist bislang nicht hinterlegt.
+Status: **abgeschlossen, mit offenem Nachweis für das öffentliche Streamlit-Deployment.**
+Der gesamte lokale Ablauf und die GitHub-Automation sind geprüft; die Umsetzung liegt in `main`.
+Für die zusätzliche Prüfung eurer veröffentlichten App fehlt ihre tatsächliche URL.
 
 ## Geprüfter Datenfluss
 
@@ -72,8 +73,35 @@ für Linux, Windows und macOS ergänzt.
   Ausfall, Stornierung, Feedback und Veranstalterabsage.
 - Task-6-Mergeprüfung auf `main` ebenfalls auf Linux, Windows und macOS erfolgreich:
   [Prüflauf](https://github.com/rehman9010/V1-WeekWise/actions/runs/43748620306).
-- Zusätzliche Browser-Timerprüfung läuft mit kontrolliertem Feed und unveränderten
-  Produktionseinstellungen; das konkrete Ergebnis wird nach Abschluss eingetragen.
+- Eine isolierte Chromium-Sitzung bemerkte eine neue Quellenrevision nach **300,8 Sekunden**
+  ohne weiteren Klick, Reload oder Refresh. Cache und Fragmenttimer blieben unverändert bei
+  300 bzw. 60 Sekunden. Ein geänderter Titel erschien im neu gerenderten App-Inhalt;
+  der Quellenzeitpunkt wurde korrekt erneuert. Genau ein weiterer Feedabruf, keine JavaScript-
+  Fehler oder Streamlit-Ausnahmen.
+- Ein kontrollierter zusätzlicher Event wurde automatisch als dritte Quellen-ID eingefügt;
+  der bereits bestätigte Event erhielt die geänderte Startzeit ohne neue Planidentität.
+- Anschließend wurde der echte Test-Streamlit-Server beendet und neu gestartet. Bei nun
+  ausgefallenem Feed bestätigte ein neuer Browser: alle drei Angebote vorhanden, neuer Event
+  sichtbar, verschobener bestätigter Plan sichtbar, Profil wiederhergestellt und der vollständige
+  private Planeintrag unverändert. SQLite-Integrität weiterhin `ok`.
+
+Die Browserprüfungen verwenden die echten App-Seiten und Handler, aber ausschließlich temporäre
+Daten, eine feste fachliche Uhr und einen kontrollierten Feed. Sie verändern weder UniClubs
+noch die persönlichen Dateien der normalen App. Die Testserver wurden danach beendet;
+der bereits vorhandene normale Streamlit-Server blieb verfügbar.
+
+## Übernahme und native CI
+
+- [Pull Request #3](https://github.com/rehman9010/V1-WeekWise/pull/3) nach erfolgreichen Prüfungen
+  regulär nach `main` übernommen; Merge-Commit `b0a9e4add198eb794b15932fc88fbb14fa898e84`.
+- [Pull-Request-Prüfung](https://github.com/rehman9010/V1-WeekWise/actions/runs/43749960350)
+  und [Branch-Prüfung](https://github.com/rehman9010/V1-WeekWise/actions/runs/43749951727)
+  jeweils auf **Linux, Windows und macOS erfolgreich**: frische Installation,
+  Abhängigkeitsprüfung, 357 Tests und alle drei App-Abnahmen einschließlich der vier neuen
+  Wiederanlaufphasen.
+- Öffentlicher Quellenfeed, SQLite-Binärdateien und private Dateien wurden durch den
+  Test-/Dokumentationscommit nicht ersetzt. Der echte Quellenfeed wurde nur vom zuvor genannten
+  regulären Abgleichjob aktualisiert.
 
 Prüfbefehle aus dem Projektverzeichnis mit aktiviertem Python-3.11-Environment:
 

@@ -225,15 +225,16 @@ feedback, suggestions/conflicts, filters, navigation, rankings, friends, model e
 real HTTP GET/POST, API fallback, source refresh and a restored session. It captures the actual
 ICS export and checks the Google compose URL. Existing local data and private files are untouched.
 
-The runner lives in `views/` to respect the Streamlit import boundary; neither test helper is a
-registered page. Run it through `views.check_demo`, which sets temporary paths before importing
+The acceptance runners live in `views/` to respect the Streamlit import boundary; they are not
+registered pages. Their entry points set temporary paths before importing
 modules with default path arguments. AppTest reruns whole scripts, so dialogs are requeued;
 tracked tabs use their session-state labels. This checks UI handlers and chart output, while
 browser layout and external calendar-provider behavior still need manual review.
 
 `.github/workflows/check.yml` defines fresh Python 3.11 installations, dependency checks, unit
-tests and this scenario on Linux, Windows and macOS. It runs on push, pull request or manual
-dispatch. A committed workflow is not evidence of a successful native run; see the milestone
+tests and all three acceptance scenarios on Linux, Windows and macOS. It runs on push,
+pull request or manual dispatch. A committed workflow is not evidence of a successful native run;
+see the milestone
 report for the platforms actually tested.
 
 **Stop the app before running `python synthetic_data.py`: this command resets SQLite, including your
@@ -247,7 +248,7 @@ evaluation and forced transaction rollback.
 On a cloud host with a read-only home directory, prefix commands with
 `MPLCONFIGDIR=/tmp/weekwise-mpl XDG_CACHE_HOME=/tmp/weekwise-cache` for writable plotting caches.
 
-## Separate UniClubs database, automation and Streamlit (Tasks 2–6)
+## Separate UniClubs database, automation and Streamlit (Tasks 2–7)
 
 The user-requested UniClubs catalog has its own SQLite file, `data/uniclubs.sqlite`.
 Create its empty tables from the repository directory with:
