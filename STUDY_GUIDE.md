@@ -1,4 +1,4 @@
-<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-15, UniClubs Task 7; review pending -->
+<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-15, UniClubs Task 8; review pending -->
 # WeekWise study guide – through M8
 
 ## Separate UniClubs catalog – Task 2 (2026-11-15)
@@ -139,6 +139,25 @@ Run `python -m views.check_uniclubs_recovery`. Explain why another session in on
 reuse cached values, while a fresh interpreter must reconstruct state from persisted SQLite/JSON.
 Distinguish a restart preserving local files from a deployment that replaces those files. The
 public feed restores the catalog; it does not restore personal ratings or plans from GitHub.
+
+## Public catalog handoff – Task 8 (2026-11-15)
+
+See [UNICLUBS_TASK_8.md](UNICLUBS_TASK_8.md) for the URL-independent operating guide.
+
+The handoff uses the existing `uniclubs_export.restore_export` and `build_export` functions,
+not a copy of an existing application database (A07). Read the bundled SQL dump alongside the
+schema: primary keys identify records; `events.club_id` is a foreign key; a JOIN obtains the
+public club name. `NULL` still means an unknown end, not zero duration.
+
+The packaging check restores JSON to a fresh SQLite file, compares the JSON roundtrip, restores
+the SQL dump into another empty database and compares again (L04, A07). This tests that both
+handoff formats preserve the same public identities and values. Explicit UTF-8 keeps club/event
+names readable; a read-only SQLite URI prevents the inspection example from creating a file
+when the path is mistyped. URI mode is an explained SQLite-library addition.
+
+ZIP and SHA-256 are standard-library packaging/integrity tools, not newly claimed course topics.
+A checksum detects a changed file; the pinned public GitHub commit records its provenance.
+Neither makes the standalone file self-updating: the running workflow and app provide that.
 
 Start with `models.py`, then `gaps.py`, `database.py`, `rankings.py`, `recommender.py`
 and calendar export. Read the importers when tracing source data into the database.

@@ -1,4 +1,4 @@
-<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-15, UniClubs Task 7; review pending -->
+<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-15, UniClubs Task 8; review pending -->
 # WeekWise
 
 WeekWise helps HSG students fit sport, leisure and career activities around classes and private
@@ -248,7 +248,7 @@ evaluation and forced transaction rollback.
 On a cloud host with a read-only home directory, prefix commands with
 `MPLCONFIGDIR=/tmp/weekwise-mpl XDG_CACHE_HOME=/tmp/weekwise-cache` for writable plotting caches.
 
-## Separate UniClubs database, automation and Streamlit (Tasks 2–7)
+## Separate UniClubs database, automation and Streamlit (Tasks 2–8)
 
 The user-requested UniClubs catalog has its own SQLite file, `data/uniclubs.sqlite`.
 Create its empty tables from the repository directory with:
@@ -321,6 +321,12 @@ the bundle, outage restart, malformed feed restart and older feed restart. Saved
 private plans/favorites, calendar exports and SQLite integrity must survive all four phases.
 The full checking workflow runs this command on Linux, Windows and macOS. See
 [UNICLUBS_TASK_7.md](UNICLUBS_TASK_7.md) for the final operating checks and the short demo guide.
+
+Task 8 provides a separate public-only handoff package in the chat workspace: a fresh SQLite
+snapshot, its JSON source, SQL dump and provenance/checksum manifest. The package is a fixed
+copy for inspection; the app/workflow continues to own automatic refresh. No existing app DB
+is copied or replaced. See [UNICLUBS_TASK_8.md](UNICLUBS_TASK_8.md) for checks and operating steps
+that do not depend on knowing a public Streamlit URL. The binary package is not committed here.
 
 ## Real activity sources and taxonomy
 
