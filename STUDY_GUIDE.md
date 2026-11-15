@@ -1,5 +1,93 @@
-<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-06, Navy & Oak design, SPEC.md v1.0; review pending -->
+<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-15, UniClubs Task 5; review pending -->
 # WeekWise study guide – through M8
+
+## Separate UniClubs catalog – Task 2 (2026-11-15)
+
+The user requested a new SQLite database rather than adding this catalog to the old database.
+See [UNICLUBS_TASK_2.md](UNICLUBS_TASK_2.md) for the German walkthrough and commands.
+
+- `uniclubs_database.SCHEMA`, `get_connection`, `init_db`: SQLite tables, PK/FK, UNIQUE,
+  CHECK and transactions (A07; uploaded Unit07.section3/4).
+- `add_club`, `add_event`, `record_import`: parameters, dictionaries and tuples (U02 s5,
+  U03 s2–s4, L04); SQL placeholders separate data from instructions (A07).
+- `get_events`: INNER JOIN adds the club name; ORDER BY sorts the catalog (A07).
+- `get_import_log`: read attempts in reverse insertion order (A07).
+- `normalize_utc_time`, `_observed_at`: preserve UTC source times as normalized text. This separate
+  catalog boundary does not change the existing app's naive Zurich clock. Timezone-aware
+  clocks and microsecond normalization are explained implementation additions.
+- `tests/test_uniclubs_database.py`: isolated in-memory integrity tests, including duplicate
+  source IDs, orphan events, invalid SQL updates, time precision and rollback after failures.
+
+Create the empty catalog with `python -m uniclubs_database`. No new dependency is needed.
+The generated file is ignored by Git. Network import, updates and Streamlit integration remain
+separate tasks; the existing database is not used by this catalog.
+
+## Manual UniClubs import – Task 3 (2026-11-15)
+
+See [UNICLUBS_TASK_3.md](UNICLUBS_TASK_3.md) for the German walkthrough and live-import results.
+
+- `importers.fetch_uniclubs_events_html`: one bounded HTTP GET using the existing `requests`
+  dependency, with timeout and verified TLS (L06, A06). No login, token or API is required.
+- `uniclubs_importer.UniClubsPage`: a small class collects public links and script fragments
+  (U05 s2). `HTMLParser` and its callback methods are an explained standard-library addition.
+- `_extract_events`, `_collect_event_lists`: JSON reads data instead of executing JavaScript;
+  lists, dictionaries and recursion traverse the source component (L04, U03 s3).
+- `_normalize_item`, `_event_record`, `_source_time`: small functions map the source fields,
+  preserve UTC and keep publication distinct from registration state (U02 s5, U03 s2).
+- `_select_future`: loops, sets and dictionaries validate unique IDs, links and club identities;
+  only future starts are selected (U03 s1, L04).
+- `uniclubs_database.insert_initial_catalog`: all clubs, events and the success report commit
+  together; a failing later record rolls back the whole import (A07).
+- `run_import`: compose download, validation, storage and sanitized error logging (U03 s2).
+
+The existing HTTP module retains the project's network import boundary; the new parser does
+not import `requests` or Streamlit. No new package, background process or scheduler is added.
+The importer intentionally refuses an existing catalog before network access. Updating
+previously imported events is Task 4; this task proves the manual first import.
+
+## Repeatable UniClubs synchronization – Task 4 (2026-11-15)
+
+The command `python -m uniclubs_importer` now calls `run_sync`, including for existing catalogs.
+The Task 3 `run_import` helper remains available only as its original empty-catalog operation.
+See [UNICLUBS_TASK_4.md](UNICLUBS_TASK_4.md) for the current German walkthrough.
+
+- `sync_catalog`, `_sync_clubs`, `_sync_events`: SELECT existing source IDs, then INSERT or
+  UPDATE with placeholders; retain local primary keys and event first-seen times (A07).
+- `_prepare_sync_source`, `_apply_sync`: dictionaries and sets organize full-source identities;
+  new historical events are skipped, known past/ongoing events are still updated (L04, U03 s2).
+- `_mark_missing_events`: a separate boolean records a missing source; it never invents a
+  cancellation or deletes rows. Reappearing source IDs clear the flag (A07, U02 s4).
+- `init_db`: PRAGMA table_info plus an additive ALTER TABLE migrates the Task 3 file (A07).
+- `verify_sitemap`: compare overview URLs with an independent public document. XML parsing
+  through ElementTree is a standard-library addition, with no new package or browser.
+- `fetch_uniclubs_sync_documents`: one overview request, a one-second pause, then a sitemap
+  request. The pause respects the observed crawl delay; it does not schedule later runs.
+- `tests/test_uniclubs_sync.py`: test migrations, identity preservation, changed times,
+  absence/restoration and rollback after actual SQLite writes, using only in-memory fixtures.
+
+The write transaction uses BEGIN IMMEDIATE so overlapping manual runs read a consistent
+catalog before updating it. A backwards observation clock is rejected to preserve newer data.
+These are explained integrity additions to the course's basic SQL and transaction patterns.
+
+## Public snapshots and GitHub automation – Task 5 (2026-11-15)
+
+See [UNICLUBS_TASK_5.md](UNICLUBS_TASK_5.md) for the German walkthrough and activation evidence.
+
+- `uniclubs_export.build_export`, `validate_export`: explicit dictionaries/lists describe the
+  public fields; types, identities, timestamps and relationships are checked (L04, U03 s2).
+- `restore_export`: INSERT original primary keys and relationships inside one SQLite
+  transaction; never overwrite a populated catalog (A07).
+- `write_export`: JSON is written as UTF-8 and atomically replaces the previous file only
+  after complete validation (L04; temporary-file replacement is an explained extra).
+- `uniclubs_refresh.refresh_export`: a fresh runner restores the previous public snapshot,
+  performs the Task 4 sync, and exports the result; a damaged snapshot is not ignored (U03 s2).
+- `.github/workflows/uniclubs-sync.yml`: GitHub supplies the timed execution. The application
+  has no thread or background scheduler. YAML, cron and GitHub Actions are deployment additions,
+  not newly claimed lecture material.
+
+Every successful run advances public observation times, so unchanged event details can still
+produce a JSON commit. The bot stages only the public file, and normal pushes refuse conflicts.
+The SQLite binary, private app data and full import logs are not published.
 
 Start with `models.py`, then `gaps.py`, `database.py`, `rankings.py`, `recommender.py`
 and calendar export. Read the importers when tracing source data into the database.

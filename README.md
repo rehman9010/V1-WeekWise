@@ -1,4 +1,4 @@
-<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-06, Navy & Oak design, SPEC.md v1.0; review pending -->
+<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-15, UniClubs Task 5; review pending -->
 # WeekWise
 
 WeekWise helps HSG students fit sport, leisure and career activities around classes and private
@@ -244,6 +244,54 @@ evaluation and forced transaction rollback.
 
 On a cloud host with a read-only home directory, prefix commands with
 `MPLCONFIGDIR=/tmp/weekwise-mpl XDG_CACHE_HOME=/tmp/weekwise-cache` for writable plotting caches.
+
+## Separate UniClubs database and manual synchronization (Tasks 2–4)
+
+The user-requested UniClubs catalog has its own SQLite file, `data/uniclubs.sqlite`.
+Create its empty tables from the repository directory with:
+
+```bash
+.venv/bin/python -m uniclubs_database
+```
+
+The command preserves existing catalog records and does not open the WeekWise database.
+The database module uses only Python's standard library. See
+[UNICLUBS_TASK_2.md](UNICLUBS_TASK_2.md) for its schema and course references.
+
+For the initial import or a later manual synchronization:
+
+```bash
+.venv/bin/python -m uniclubs_importer
+```
+
+This checks the public HSG event overview against its visible links and the public sitemap,
+spacing requests by one second. New future events are added; known events are updated by
+their source ID, preserving local IDs and first-seen times even after a date change.
+Events absent from a verified snapshot remain stored with `source_missing=1`; absence is
+not treated as cancellation. The command never resets the catalog or deletes events.
+The first import saved 49 events from 23 clubs; repeated live syncs preserved those IDs.
+See [UNICLUBS_TASK_4.md](UNICLUBS_TASK_4.md) for current behavior and
+[UNICLUBS_TASK_3.md](UNICLUBS_TASK_3.md) for the historical first-import results.
+
+The generated SQLite file is ignored by Git. Task 5 adds the durable public snapshot
+`data/public/uniclubs_events.json` and `.github/workflows/uniclubs-sync.yml`. The workflow runs
+on the default branch at minutes 17 and 47 of each UTC hour, or through Actions →
+**UniClubs public catalog → Run workflow**. It restores the previous snapshot into a fresh
+SQLite catalog, verifies the source, and commits only the public JSON. No manual token is needed;
+the workflow uses GitHub's automatic `GITHUB_TOKEN` with job-scoped contents-write permission.
+The workflow must be present on the default branch and allowed by repository settings to run.
+
+To refresh the public export locally using the existing catalog:
+
+```bash
+.venv/bin/python -m uniclubs_refresh
+```
+
+The JSON contains only public club/event fields, identities, observation times and missing-source
+markers. It retains known history; it contains no profiles, private calendars, descriptions,
+images, access codes or import-log history. A malformed existing snapshot stops the refresh.
+See [UNICLUBS_TASK_5.md](UNICLUBS_TASK_5.md) for recovery, verification and activation status.
+Streamlit catalog integration remains Task 6. No new application package is required.
 
 ## Real activity sources and taxonomy
 
