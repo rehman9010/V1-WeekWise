@@ -19,6 +19,7 @@ import config
 import database
 import friends
 import models
+import api_client
 import ui_components
 
 
@@ -114,6 +115,17 @@ class ProvenanceUITests(unittest.TestCase):
                 patch.object(ui_components, 'cached_api_available', return_value=False) as health:
             self.assertFalse(ui_components.api_available(NOW))
         health.assert_called_once_with('reviewed-fixture')
+
+    def test_event_cache_does_not_reuse_another_catalogue_for_the_same_week(self):
+        """A source change must miss the cached event list even when dates and API state match."""
+        ui_components.cached_events.clear()
+        self.addCleanup(ui_components.cached_events.clear)
+        with patch.object(ui_components, 'cached_connection', return_value='connection'), \
+                patch.object(api_client, 'get_events', return_value=([], 'database')) as read:
+            ui_components.cached_events(NOW, NOW, False, 'demo')
+            ui_components.cached_events(NOW, NOW, False, 'reviewed-fixture')
+            ui_components.cached_events(NOW, NOW, False, 'reviewed-fixture')
+        self.assertEqual(read.call_count, 2)
 
     def test_reviewed_sidebar_shows_evidence_totals_without_demo_labels(self):
         """Real catalogue counts stay separate from synthetic users and placeholder badges."""

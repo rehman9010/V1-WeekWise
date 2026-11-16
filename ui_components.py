@@ -73,7 +73,7 @@ def render_chart(figure, alt):
 @st.cache_resource
 def cached_connection():
     """Return the shared local SQLite connection."""
-    return database.get_connection()
+    return database.get_connection(config.DB_FILE)
 
 
 # New ratings change the count; edits change the revision. Ordinary reruns reuse the same model.
@@ -288,15 +288,16 @@ def _record_api_origin(origin, attempted_api):
 # Source refreshes/failures clear this cache; availability changes its key; otherwise TTL is 60 s.
 @st.cache_data(ttl=config.EVENT_CACHE_SECONDS, max_entries=config.EVENT_CACHE_ENTRIES,
                show_spinner=False)
-def cached_events(start, end, available=True):
-    """Cache event objects together with their origin, without hiding a database fallback."""
+def cached_events(start, end, available=True, catalogue_id=None):
+    """Cache event objects by interval and catalogue, retaining the actual transport origin."""
     return api_client.get_events(start, end, available, cached_connection())
 
 
 def load_events(start, end):
     """Load the week and reflect any API failure outside the cached function's body."""
     available = api_available()
-    events, origin = cached_events(start, end, available)
+    catalogue_id = database.get_catalogue_id(cached_connection())
+    events, origin = cached_events(start, end, available, catalogue_id)
     _record_api_origin(origin, available)
     if uniclubs_status()['catalog_available']:
         # Real UniClubs data replace its old invented ideas; saved old plans are still retained.

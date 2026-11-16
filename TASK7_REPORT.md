@@ -74,7 +74,7 @@ den bereits dokumentierten `hashlib`-Helfer.
 
 Lokal unter Linux/Python 3.11:
 
-- **491 Unit-/Regeltests** einschließlich 16 neuer Bootstrap-/Starttests.
+- **492 Unit-/Regeltests** einschließlich 16 neuer Bootstrap-/Starttests.
 - Bestehender kompletter M8-Demo-/API-Ablauf bestanden.
 - Eigenständiger UniClubs-Kalender-/Planungsablauf bestanden.
 - UniClubs-Cold-Start und Wiederherstellung über neue Prozesse bestanden.
@@ -85,6 +85,11 @@ Lokal unter Linux/Python 3.11:
 - Manifest-Prüfsumme/Größe/Zeitraum/Zähler und unveränderte Seed-Datei im App-Test geprüft.
 - Frischer API-Dateistart vor Streamlit im Test geprüft; Quelle und API/DB-Vertrag erhalten.
 - Alle installierten Abhängigkeiten kompatibel; Pins unverändert.
+
+Der Wochen-Cache ist zusätzlich nach Bestandskennung getrennt. Die Verbindung liest
+den konfigurierten Arbeitsdateipfad ausdrücklich; die geänderte Cache-Funktion wird
+bei der automatischen Code-Aktualisierung neu aufgebaut. So kann eine alte gecachte
+Demo-Woche nicht als Ergebnis des neuen Kursbestands weiterverwendet werden.
 
 Die GitHub-Prüfmatrix führt diese Tests und alle vier App-Abläufe auf Linux, Windows und
 macOS aus. Für den zusätzlichen gemeinsamen Ablauf ist die Job-Grenze auf 20 Minuten
