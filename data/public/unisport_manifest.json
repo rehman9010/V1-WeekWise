@@ -1,0 +1,27 @@
+{
+  "_meta": {
+    "ai_citation": "OpenAI Codex (GPT-6), 2026-11-16, approved Task 7; reviewed by: pending",
+    "prepared_on": "2026-11-16",
+    "website_evidence_checked_on": "2026-11-15",
+    "purpose": "Read-only reviewed starter; mutable profiles live in a separate ignored database."
+  },
+  "file": "unisport_starter.sqlite",
+  "sha256": "c7880899488155214ff78b02630458fcbe6f93a77df3b89bb0e3d6b127d33708",
+  "bytes": 581632,
+  "catalogue_id": "reviewed-4391b9c074a7bcdcb3124e5cca61f34682230d0966481ce4cde1715fb803cf49",
+  "first_date": "2026-11-16",
+  "last_date_inclusive": "2026-12-13",
+  "counts": {
+    "series": 263,
+    "events": 1052,
+    "website": 967,
+    "projected": 85,
+    "masked_series": 15,
+    "masked_projected_events": 60,
+    "private_archive_rows": 0,
+    "copied_user_profiles": 0
+  },
+  "availability": "unknown",
+  "prices_and_locations": "unknown",
+  "private_source_files_included": false
+}

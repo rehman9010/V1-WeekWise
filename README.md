@@ -1,4 +1,4 @@
-<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-15, UniClubs Task 8; review pending -->
+<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-16, Task 7 combined source integration, SPEC.md v1.0; review pending -->
 # WeekWise
 
 WeekWise helps HSG students fit sport, leisure and career activities around classes and private
@@ -6,10 +6,13 @@ appointments. Offers are spread across different sources; manually comparing eve
 a calendar takes time. WeekWise finds free gaps, ranks suitable activities, exports confirmed
 plans and learns from attendance feedback.
 
-This checkout implements **M1–M8: data, calendar/gaps, planning, ML/feedback, the local API,
-rankings, model evaluation, friends/invitations and the reproducible acceptance check**.
-M8 has open external checks: native Windows/macOS runs, real-source review when inputs arrive,
-and manual Google/Outlook/browser verification. See [MILESTONE_M8.md](MILESTONE_M8.md).
+This checkout includes the reviewed **Unisport starter: 1,052 dates for 16 Nov–13 Dec 2026**,
+with 967 website checks and 85 labelled projections, plus the independent UniClubs public feed.
+The starter's website evidence was checked on 15 November; uploading it does not refresh availability.
+The existing calendar, planning, ML/feedback, local API, rankings and friends features remain.
+See [PUBLIC_STARTER_GUIDE.md](PUBLIC_STARTER_GUIDE.md) for the German operating guide and
+[TASK7_REPORT.md](TASK7_REPORT.md) for publication checks. External Google/Outlook account
+verification remains a separate manual check.
 The interface uses English and Europe/Zurich local time.
 
 ## Run
@@ -41,12 +44,21 @@ For Windows venv users: `py -3.11 -m venv .venv`, then
 `.venv\Scripts\python -m streamlit run app.py`. The commands below use `python` from an activated
 environment; replace it with the venv interpreter if you have not activated one.
 
-The first page run creates SQLite, 480 Unisport occurrences, 60 UniClubs events, 30 city events,
-the demo calendar, and 60 synthetic profiles with preferences and feedback. No account, URL or
-network is needed. Restarting preserves occurrence IDs and your local profile.
-The demo is anchored to the Monday of the first-start week and contains four past and eight
-current/future weeks. After generating histories, unreferenced past occurrences are cleaned up;
-events with interactions or invitations remain available.
+The first page run copies the read-only [public starter](data/public/unisport_starter.sqlite)
+into ignored `data/weekwise-reviewed.sqlite`, then opens onboarding. It does not require the
+private Excel, CSV or historical archive. The starter has no profiles or individual ratings.
+Source labels and verification details are visible; unknown availability disables confirmation.
+UniClubs keeps its own catalogue and private plans. Its checked-in public snapshot supports
+offline startup when a feed refresh is unavailable. Restarting preserves your working data.
+
+The new working filename keeps an existing `data/weekwise.sqlite` unchanged. It does not migrate
+old demo confirmations to unrelated real-course IDs; the reviewed catalogue has its own onboarding.
+To open the original ML demo, set `WEEKWISE_DATA_MODE=demo` before starting either process.
+In Bash: `WEEKWISE_DATA_MODE=demo python -m streamlit run app.py`. In PowerShell:
+`$env:WEEKWISE_DATA_MODE='demo'`, then `python -m streamlit run app.py`.
+That mode uses `data/weekwise.sqlite`, generates synthetic profiles and labelled sample feedback,
+and retains the original four-past/eight-current-or-future-week demo. Clear the variable to return
+to the reviewed default. `WEEKWISE_DB_FILE` can explicitly select another separate working file.
 
 ## Optional local API
 
@@ -57,7 +69,8 @@ python api_server.py
 ```
 
 It runs on `http://127.0.0.1:5001` with debug/reloading off and shares the app's SQLite file.
-It can start first: it prepares an empty schema, and the first Streamlit page run fills demo data.
+It can start first: a fresh reviewed working file receives the public starter immediately.
+Explicit demo mode prepares a schema for the first Streamlit page run to fill.
 The sidebar shows **Event data: own API ✓** when available. Events, event details and interaction
 writes use HTTP; the app continues directly with SQLite when the API is unavailable.
 
@@ -69,7 +82,7 @@ UI rerun after that interval discovers a restarted API. No background polling is
 | --- | --- | --- |
 | GET | `/health` | Status and version |
 | GET | `/categories` | Directions, bundle lists and configured colors |
-| GET | `/events?from=2026-11-02&to=2026-11-09` | Events in `[from,to)`; optional `direction`, `bundle`, `source` filters |
+| GET | `/events?from=2026-11-16&to=2026-12-14` | Sport dates in `[from,to)`; optional `direction`, `bundle`, `source` filters |
 | GET | `/events/42` | One event, or JSON 404 |
 | POST | `/interactions` | JSON `user_id`, `event_id`, `action`, optional `rating`; stored row with HTTP 201 |
 
@@ -83,8 +96,9 @@ without duplicating its transition or rating revision.
 Complete the three-step welcome flow: read the introduction, enter a display name and select
 at least one focus direction, then use the demo calendar, test your HTTPS link, or upload an ICS
 file. A changed link must be tested again before Finish. Invalid input shows a friendly fallback
-message and you can explicitly choose Demo. **Load demo history** is optional and checked by
-default: it adds sample attendance/ratings, up to two pending feedback events and three demo friends.
+message and you can explicitly choose a demo calendar. **Load demo history** is disabled for
+the reviewed catalogue; in explicit activity-demo mode it adds sample attendance/ratings,
+up to two pending feedback events and three demo friends.
 
 The Week page ranks fitting activities with a seeded Random Forest trained on attended ratings.
 It shows three suggestions per gap and a **More options** dropdown for the rest. Match scores use
@@ -92,7 +106,9 @@ the probability of a positive rating plus capped favorite boosts. With fewer tha
 only one label class, a visible baseline uses focus and favorites. Open **Details** to favorite
 a course/series, club or category.
 
-Choose **Confirm** to block that occurrence and remove conflicting suggestions. The dialog then
+Where the source has a known usable time and availability, **Confirm** blocks that occurrence
+and removes conflicting suggestions. Reviewed sport dates with unknown availability remain
+inspectable suggestions with disabled confirmation. For confirmed activities, the dialog
 offers **Download .ics**, **Add to Google Calendar**, **Add to Outlook**, and any source or
 registration links. Only one date is exported, including for weekly courses. **Cancel this event**
 reopens its slot, restores suggestions, and offers a cancellation ICS. If the exported entry
@@ -441,3 +457,200 @@ Oak grain now appears on navigation, buttons, day headers and the calendar frame
 The timetable uses light paper surfaces with dark text. Texture is a local SVG, not
 a downloaded image. `calendar_layout.py` owns clipping and collision lanes; pixel
 geometry comes from `config.py`. No events, exports, ratings or source data are changed.
+
+
+## Task 3: private historical training archive
+
+The supplied CSV is an attendance/history export, not a current-offer workbook. Use
+the explicit archive command; do not rename it to `data/sources/unisport.xlsx` or
+feed it to the normal offer refresh. Place the original file under `data/private/`:
+
+```bash
+python training_history.py "data/private/training_inputs/CSV_2026 Auswertung Trainings .csv"
+```
+
+The default output is `data/private/training_history.sqlite`, excluded by `.gitignore`.
+It uses the existing SQLite schema plus `training_imports` and `training_history`.
+This task fills only those two archive tables. Existing `series` and `events` stay
+empty in a fresh archive. It does not create predictions or change the app/API routes.
+An optional `--database path/to/private.sqlite` selects another local database.
+
+The importer reads UTF-8 (with optional BOM), semicolon-separated records, the exact
+eight audited headers, and German date text such as `Mittwoch, 4. November 2026`.
+It stores the original date spelling alongside the ISO date and retains the source-row
+number. Blank sport/variant/count fields become SQL NULL; actual zeros remain integers.
+Values such as 9999 and the not-yet-interpreted `Teilnehmer teacher` field are preserved.
+No literal `NA`/`NULL` text is silently treated as a blank.
+
+All rows are validated before insertion. A transaction stores file metadata and rows
+together. Errors report row/field names without repeating private source content.
+The importer has separate bounded archive limits (25,000 rows / 10 MB); the existing
+5,000-record offer limit is unchanged. Original files are never overwritten.
+
+Repeated import of identical bytes verifies all stored rows and inserts zero additional
+rows, even if the file is renamed. A changed export is a new retained batch. Different
+BOM/line endings also mean different bytes; future recurrence analysis must count
+distinct training dates, not duplicate rows or repeated file versions.
+
+Keep the original Excel and Task 1 audit privately: CSV cannot distinguish the 13
+original empty text cells from genuine empty cells. Date/number types are explicitly
+restored during import. The usual calendar cleanup and demo reset preserve archive
+tables. Do not publish raw archive files or unreviewed personal-name free text.
+
+Verification uses synthetic test fixtures; no supplied training rows are committed:
+
+```bash
+python -m unittest discover -s tests -v
+python -m views.check_demo
+```
+
+The technical SHA-256 fingerprint and argument parser are small provenance/CLI helpers,
+not claims about material taught in Week07. The data operations use pandas, datetime,
+SQLite and parameterized SQL. See `TASK3_REPORT.md` and `STUDY_GUIDE.md`.
+
+
+## Task 4: provisional future weeks from historical patterns
+
+After Task 3, explicitly generate four complete future weeks in the same private archive:
+
+```bash
+python training_forecast.py
+```
+
+The default horizon starts on the next Monday strictly after today. To select a
+specific future Monday, use `--start-date YYYY-MM-DD`. For the verified run on
+15 November 2026 the selected horizon was 16 November–13 December 2026. The source
+observations end on 6 November 2026; the observation window is anchored to the
+archive date, not the current computer date.
+
+The rule groups the exact sport, variant, weekday and start time. A sport name must
+be present. A pattern qualifies if it occurs on at least three distinct dates in
+the last 28 observed days and also occurs in their final seven days. Repeated
+rows or repeated exports do not count as extra evidence. Local course IDs use
+`history-pattern:<earliest historical row ID>`; these are not official Unisport IDs.
+
+The actual archive yields 263 patterns and 1,052 provisional events. Every new event
+has `status='unknown'`, `end_is_estimated=1`, location TBA, unknown price and
+`event_provenance.kind='projected'`. The 90-minute duration is the existing explicit
+app fallback, not a duration learned from the export. No future event is called
+website-confirmed, and no personal confirmation, invitation or rating is generated.
+Normal confirmation/invitation actions reject unknown availability. A future UI
+for deliberate provisional planning belongs to the later integration task.
+
+Generating the same still-future horizon again preserves all IDs and inserts no
+additional slots. Existing manually edited durations, existing events without
+provenance, and website-verified events are not overwritten. A later overlapping
+horizon appends only missing dates. Generation is additive: it does not delete old
+forecasts or run the normal whole-source reconcile. Source observations and file
+metadata remain unchanged. Website checking, publication and final UI integration
+are separate gated tasks. Private titles/variants still require review before export.
+
+`database.init_db()` now safely upgrades the original event-status CHECK to allow
+`unknown`, retaining event IDs, references, indexes, triggers and views. It refuses
+an unrecognized event-table layout or a pending caller transaction during migration.
+`event_provenance` stores forecast evidence or later website checks independently
+of booking availability. See `TASK4_REPORT.md` for results and verification.
+
+## Check published Unisport appointments (approved Task 5)
+
+The official calendar loads public JSON from its schedule API. On 15 November 2026,
+four complete responses were checked against the existing 16 Nov–13 Dec forecast.
+An explicit review approved 248 local pattern-to-product mappings. Exact official
+product, public title, appointment description, Zurich date and start time must all
+match. An empty description is an exact value, never a wildcard; multiple official
+appointments or multiple local claims are left unresolved.
+
+Apply the privately saved, reviewed evidence to the same local forecast database:
+
+```bash
+python training_verification.py data/private/website_review/evidence.json
+```
+
+The package contains `snapshots` (complete response, actual source URL and check time)
+and `course_approvals` (local `external_id`, official `product_id`, `public_title`, exact
+`appointment_description`). It is specific to the reviewed archive and its local IDs.
+Do not reuse it for a different archive without a fresh review. The script does not
+download data, run on app startup, or infer approvals from similar names.
+
+Actual result: **967 website-evidenced dates**, **85 still provisional**, with zero
+changes on replay. Website evidence replaces estimated end times and sets provenance
+to `website`, retaining historical evidence and event identities. The source frontend
+adds one minute to the API's inclusive end timestamp; the verifier uses that same
+display convention. It accepts legitimate multi-day source appointments too.
+
+Availability remains `unknown`: publication does not establish a free place, price,
+eligibility or registration. Missing dates are not treated as cancellations. Existing
+manual durations, newer website checks, shared course fields, user data and the
+historical archive are protected. There is no source reconciliation or deletion.
+
+Raw responses and the detailed approval audit remain under ignored `data/private/`.
+Public titles and appointment qualifiers have been reviewed for the accepted mappings;
+only explicitly selected fields may enter the later public export. Shared locations,
+prices and course identifiers were not guessed or overwritten. See `TASK5_REPORT.md`.
+The Task 6 integration below consumes this reviewed data; publication remains Task 7.
+
+## Use the reviewed catalogue in the app and API (approved Task 6)
+
+Prepare an application database from the private archive and Task-5 approval package:
+
+```bash
+python training_catalogue.py --output data/weekwise.sqlite
+streamlit run app.py
+```
+
+An occupied database with different data is refused. The builder never deletes an
+existing profile or replaces its catalogue. To keep a separate existing demo, run
+`python training_catalogue.py` instead; this prepares `data/private/training_app.sqlite`.
+Choose that file before starting either process, for example in Bash:
+
+```bash
+export WEEKWISE_DB_FILE="$PWD/data/private/training_app.sqlite"
+streamlit run app.py
+# In a second terminal with the same variable and working directory:
+python api_server.py
+```
+
+PowerShell can set the same process variable with
+`$env:WEEKWISE_DB_FILE = "$PWD/data/private/training_app.sqlite"`.
+Both processes read the path at startup. Restart them after changing it.
+The ordinary default remains `data/weekwise.sqlite`; without a prepared catalogue,
+the existing offline demo still starts as before. Local Task 6 prepared both the
+separate preview and the default app database, each with 1,052 dates.
+
+The runtime contains **967 website-checked dates and 85 provisional dates**, retaining
+all occurrence IDs. It contains no historical rows, source-file names, participant
+statistics or copied profiles. Approved public course titles/qualifiers replace source
+labels; 15 unapproved course patterns use a neutral label for their 60 provisional dates.
+Unknown locations/prices stay unknown. The private archive is refused by app/API startup.
+
+Cards and details distinguish `Website checked` from `Provisional`. Details show the
+saved check time and actual evidence source, or observation date/evidence weeks. The
+official calendar link opens the selected day. Availability is independent: all these
+dates remain `unknown`, so confirmation and invitations are disabled. Favorites and
+browsing remain available; provisional suggestions do not occupy busy calendar time.
+
+The existing local API can return all dates, for example:
+
+```text
+http://127.0.0.1:5001/events?from=2026-11-16&to=2026-12-14
+```
+
+The shared SQLite/JSON contract adds nullable `provenance_kind`,
+`forecast_anchor_date`, `evidence_weeks`, `verification_url`, `verified_at`.
+Older complete rows load as unspecified; partial/invalid evidence is rejected.
+The API exposes neither archive routes nor raw source fields. Its response header
+`X-WeekWise-Catalogue` identifies the prepared dataset. The client sends the same
+identity and falls back locally if it differs or the response does not echo it.
+Reviewed writes also recheck identity before POST; unknown availability is still rejected
+by the shared state machine. This is a local API, not an external reservation service.
+
+Reviewed startup never seeds synthetic users/courses. Reload reads saved data without
+claiming a fresh website check. Reset clears personal app data and keeps the catalogue.
+Generic source refreshes cannot overwrite evidence-bearing slots or reconcile them away;
+archive and reviewed-mode imports are protected. The normal past-event cleanup still
+cascades provenance safely and never removes historical source rows.
+
+The real catalogue has no individual ratings. Existing heuristic suggestions work;
+the separate original demo still trains and uses the existing recommendation model.
+Aggregate participant numbers are not converted into individual preferences or ratings.
+See `TASK6_REPORT.md` for the exact checks. GitHub publication is the separately gated Task 7.

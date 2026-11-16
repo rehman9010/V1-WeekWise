@@ -1,4 +1,4 @@
-<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-15, UniClubs Task 8; review pending -->
+<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-16, Task 7 combined source integration, SPEC.md v1.0; review pending -->
 # WeekWise study guide – through M8
 
 ## Separate UniClubs catalog – Task 2 (2026-11-15)
@@ -469,3 +469,162 @@ and `python -m streamlit run app.py`. Restart Streamlit after theme configuratio
 The user's explicit request authorizes the stronger wood treatment and timed calendar
 layout. There is no JavaScript, new dependency or external texture/font request. The
 existing Day agenda remains available. Native help text respects busy-title privacy.
+
+
+## Task 3: understand the private CSV archive
+
+Read `training_history.py` from top to bottom, then the two added tables in
+`database.SCHEMA`. This task implements only the approved historical import; the
+weekly forecast, provenance for future events and Streamlit integration remain later tasks.
+
+| Function / file | What to study | Course connection |
+| --- | --- | --- |
+| `read_training_csv` | `pd.read_csv`, explicit blanks and exact headers | Unit07 bonus RealityCheck: CSV missing-value handling; A08 tabular data |
+| `parse_training_date` | Dictionaries, splitting, validation and `datetime.date` | L03, U02 s5: functions and validation; no system-locale dependence |
+| `_training_record` | Original row numbers, tuple unpacking and nullable values | U03 s4, U03 s5 |
+| `_training_count` | Whole-number validation; distinguish NULL and zero | L03; Unit07 bonus: NULL semantics |
+| `database.SCHEMA` | Two new tables, primary/foreign keys and uniqueness | Unit07 section3; books.sql; A07 |
+| `import_training_csv` | Parameter placeholders, transaction, reimport verification | A07: values bound separately from SQL; transaction owns the complete batch |
+| `tests/test_training_history.py` | Invalid sources, rollback and stable repeated imports | U05 s2: TestCase and independent assertions |
+
+SHA-256 (`hashlib`) is a technical file-provenance helper for the Task 2 fingerprint,
+not a claimed Week07 topic or a new dependency. `argparse` only exposes a convenient
+command-line entry point. `io.BytesIO` lets the parser read exactly the byte snapshot
+whose fingerprint is stored. No ORM, cloud database, background worker or new package
+is introduced.
+
+A logical row with the same sport/date/time is not necessarily a duplicate booking.
+The archive therefore keys original rows by `(import_id, source_row)`, retaining all
+observations. Task 4 must deduplicate only the evidence used to count recurring dates.
+
+`database.reset_database` resets the app/demo tables, not the private training archive.
+Archiving does not turn aggregate participant counts into users, personal ratings or
+confirmed future events. The original files and audit remain private.
+
+
+## Task 4: study the weekly recurrence rule
+
+| Function / file | What to study | Course connection |
+| --- | --- | --- |
+| `training_forecast._history_groups` | Dictionary keys and sets of distinct dates | L04, U03 s4: tuples, dictionaries and sets |
+| `derive_weekly_patterns` | A bounded four-week window and explicit 3-of-4 rule | L03: loops, branches and functions |
+| `_forecast_window` | Complete future Monday–Sunday periods using datetime arithmetic | A06, datetime/timedelta |
+| `_series_for_pattern` | Local identifiers and existing category foreign keys | A07: SELECT/INSERT, keys and parameterized values |
+| `_store_projected_event` | Keep an existing dated slot; create unknown/estimated ideas only | A07: explicit rows and relationships |
+| `generate_training_forecast` | One transaction covers courses, events and provenance | A07: atomic writes |
+| `models.Event` / invitation checks | Unknown availability is a real state, not an open booking | L05: validation through objects; L03: state conditions |
+
+Three different source dates for a fixed weekday are three separate weeks, even
+if each date occurs repeatedly in the CSV or multiple imports. The latest observed
+date anchors the window; using today's date would incorrectly erase evidence when
+revisiting this historical dataset. Local pattern identifiers retain the earliest
+historical row even when the observation window moves. No individual preferences or
+ratings are inferred from aggregate participant counts.
+
+This is a transparent recurrence rule, not a newly trained ML model. The app's
+existing recommender remains separate. Predictions are limited to four future weeks
+per explicit run and are not facts about holidays, cancellations, duration or location.
+
+The event-table upgrade is technical compatibility work required by the approved
+Task 2 design. SQLite cannot extend this CHECK with a simple ADD COLUMN: migration
+copies IDs into a replacement table in an explicit transaction and restores schema
+objects. `PRAGMA foreign_key_check` and `integrity_check` must succeed before commit.
+The narrowly scoped PRAGMA/migration details are not presented as taught Week07
+exercises. Tests verify rollback and retained references, rather than assuming safety.
+
+
+## Task 5: distinguish a published appointment from an inferred pattern
+
+| Function / file | What to study | Course connection |
+| --- | --- | --- |
+| `training_verification._label` | Explicit case-insensitive equality; empty is a real value | L04: strings and dictionary keys |
+| `_source_range`, `_observations` | Validate JSON, complete pages and bounded dated input | A06: API responses, validation; L03: loops |
+| `_public_appointment` | Select only needed fields; convert explicit aware timestamps | A06: datetime/timedelta; existing Zurich helper |
+| `_approved_patterns`, `_candidate_matches` | Exact tuple keys and one-to-one identity claims | L04: dictionaries, lists and tuples |
+| `_verify_one` | Update selected columns while keeping IDs and foreign-key references | A07: UPDATE with parameter tuples |
+| `verify_training_events` | One transaction for all accepted updates; rollback on failure | A07: `with connection:` |
+| `tests/test_training_verification.py` | Ambiguous evidence, unchanged sibling date, forced failure | L03: conditions; A07: retained data |
+
+An API response contains concrete appointments, not only a course's weekly pattern.
+The explicit approval selects an official activity product and exact public qualifier.
+The program then requires that product, title, qualifier, complete date and start time.
+An empty qualifier never means “any level”; two courts at the same time remain two
+different official appointment IDs. One official ID cannot prove two local events.
+
+`website` means the dated appointment was published at its saved check time. It does
+not mean seats are free, the participant is eligible, or a booking has been made.
+`status='unknown'` remains separate from provenance and from personal interactions.
+Checking one date does not confirm next week's occurrence of the same course.
+
+The official frontend adds one minute to its inclusive API end for display. Reusing
+that observed source convention differs from inventing a duration. Shared course
+locations/prices are not inferred from one dated response. The original 9,585 archive
+rows remain unchanged, and the private approval audit is specific to this database.
+
+The offline verifier uses JSON, functions, dictionaries, datetime and plain SQLite;
+it adds no dependency or table. `argparse` remains a small documented CLI helper,
+not a claimed Week07 exercise. Inspecting the official JavaScript was development
+research to establish API semantics; no JavaScript parsing or browser runs in the app.
+
+
+## Task 6: use the same evidence through SQL, HTTP and the calendar
+
+| Function / file | What to study | Course connection |
+| --- | --- | --- |
+| `training_catalogue._public_courses`, `_public_occurrences` | Select approved fields; keep dated identities separate from course labels | A07: SELECT, PK/FK; L04: tuples/dictionaries |
+| `build_training_catalogue` | One transaction for runtime courses/events/proofs; separate source connection | A07: parameterized INSERT and transactions |
+| `database.get_event_records`, `get_event_row` | LEFT JOIN keeps rows with missing optional evidence | A07: joins; A08: nullable table data |
+| `models.Event`, `event_from_row` | Validate optional evidence independently of availability | L05, U05 s2: objects and validation |
+| `api_server` request hooks | Identify the dataset and expose the existing event routes | L06, A06: HTTP headers/status/JSON; existing Flask extra |
+| `api_client._event_from_json`, `get_events`, `save_interaction` | Strict JSON contract, identity check and equivalent SQLite fallback | A06: requests, headers, error handling |
+| `ui_components.render_event_provenance` | Human-readable evidence and separate availability restrictions | L04: Streamlit, functions and conditions |
+| `database.reset_profile`, guarded import helpers | Delete only personal rows; keep catalogue foreign keys intact | A07: ordered DELETE, bound values, transactions |
+
+`LEFT JOIN` matters: older demo events have no provenance row. An inner join would
+silently remove them; replacing missing evidence with “website” would invent a check.
+The API accepts the full old row format as unspecified and the full new validated
+format; a partially supplied proof bundle is invalid. Nullable evidence weeks remain
+integers/None through SQLite, JSON and pandas rather than silently becoming zero.
+
+Transport origin (`api`/`database`) says how the app loaded an event. Provenance
+(`website`/`projected`/unspecified) says why that event exists. Neither says that a
+place is available. A saved website check is dated evidence, not live booking data.
+
+The prepared catalogue is a separate file and copies selected public fields only.
+Unknown titles are masked; the archive and aggregate participation counts are not
+user preferences. Real-mode startup skips synthetic seeding, so its recommendations
+use the existing heuristic until valid individual ratings exist. The original demo
+continues to exercise the trained scikit-learn model.
+
+`WEEKWISE_DB_FILE` uses the taught `os` module to choose a path before imports bind
+their defaults. The content identifier uses the already documented `hashlib` helper;
+it is a dataset marker, not a user login or cryptographic proof of website truth.
+The builder uses `argparse` only for its CLI. These technical helpers add no dependency,
+ORM, background job, new page or runtime AI service.
+
+
+## Unisport Task 7: publish a starter without publishing private working data
+
+| File / function | What to study | Course connection |
+| --- | --- | --- |
+| `starter_catalogue.validate_starter` | Explicit public fields, nullability, schema and foreign keys | A07: SQL constraints, relationships and validation |
+| `bootstrap_starter` | Empty-target checks and a separate read-only source connection | A07: connection/data ownership; technical `sqlite3.backup` helper |
+| `app.initialize`, `api_server.prepare_database` | Same startup behavior through both entry points | L03: functions/conditions; L06: application/API boundaries |
+| `database.reset_database`, `reset_profile` | Preserve the chosen dataset and remove private owner mappings | A07: targeted deletion and identity references |
+| `views/check_starter.py`, `starter_scenario.py` | Actual shipped data, isolated test files and two source namespaces | L04: dictionaries/sets; integration testing |
+
+The immutable seed contains approved public fields only. Personal activity belongs in
+an ignored working copy, so a reset or user action cannot become part of the next Git
+commit. Existing demo files remain separate; equal integer IDs are not proof that two
+catalogues represent the same event. UniClubs already uses namespaced IDs and keeps its
+private owner token separately. Both source paths are retained after the merge.
+
+The published catalogue has a fixed 16 Nov–13 Dec horizon. A new upload is not a new
+website observation, recurrence calculation or proof of free places. Read check times
+and provenance rather than inferring freshness from a Git commit date. The manifest
+checksum verifies file identity; it does not turn projections into verified dates.
+
+`sqlite3.backup` is a technical SQLite copying method for an already validated complete
+public starter, not an ORM or a newly claimed taught query pattern. Regular data reads
+and changes still use the course's explicit SQL. The four acceptance commands run in
+temporary files and preserve the original seed and private working sources.

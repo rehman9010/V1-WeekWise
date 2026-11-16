@@ -1,8 +1,9 @@
-# AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-15, UniClubs Task 2; review pending
+# AI CITATION: OpenAI Codex (GPT-6), 2026-11-16, Task 7 public starter; review pending
 .venv/
 __pycache__/
 *.pyc
 data/weekwise.sqlite
+data/weekwise-reviewed.sqlite
 data/uniclubs.sqlite
 data/uniclubs.sqlite-*
 data/private/
