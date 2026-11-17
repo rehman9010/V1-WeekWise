@@ -1,4 +1,4 @@
-<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-17, spring 2027 extension, SPEC.md v1.0; review pending -->
+<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-17; sport extension and UniClubs export; review pending -->
 # WeekWise study guide – through M8
 
 ## Separate UniClubs catalog – Task 2 (2026-11-15)
@@ -79,11 +79,16 @@ See [UNICLUBS_TASK_5.md](UNICLUBS_TASK_5.md) for the German walkthrough and acti
   transaction; never overwrite a populated catalog (A07).
 - `write_export`: JSON is written as UTF-8 and atomically replaces the previous file only
   after complete validation (L04; temporary-file replacement is an explained extra).
+- `write_sqlite`: rebuild only the validated public club/event fields in a fresh file,
+  preserving primary and foreign keys. The temporary file keeps a failed write from replacing
+  the previous published SQLite file (A07).
 - `uniclubs_refresh.refresh_export`: a fresh runner restores the previous public snapshot,
   performs the Task 4 sync, and exports the result; a damaged snapshot is not ignored (U03 s2).
 - `.github/workflows/uniclubs-sync.yml`: GitHub supplies the timed execution. The application
   has no thread or background scheduler. YAML, cron and GitHub Actions are deployment additions,
   not newly claimed lecture material.
+The maintained handoff is `data/public/uniclubs.sqlite`; the scheduled publisher updates it
+with the JSON feed. A reader's downloaded copy remains local until they download a newer file.
 
 Every successful run advances public observation times, so unchanged event details can still
 produce a JSON commit. The bot stages only the public file, and normal pushes refuse conflicts.

@@ -1,7 +1,12 @@
-# AI CITATION: OpenAI Codex (GPT-6), 2026-11-15, user-approved UniClubs Task 5; review pending
+# AI CITATION: OpenAI Codex (GPT-6), 2026-11-17; review pending
 name: UniClubs public catalog
 
 on:
+  push:
+    paths:
+      - '.github/workflows/uniclubs-sync.yml'
+      - 'uniclubs_export.py'
+      - 'uniclubs_refresh.py'
   schedule:
     # UTC; staggered away from the busiest minute at the beginning of the hour.
     - cron: '17,47 * * * *'
@@ -51,13 +56,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git add -- data/public/uniclubs_events.json
-          if git diff --cached --quiet -- data/public/uniclubs_events.json; then
+          public_files=(data/public/uniclubs_events.json data/public/uniclubs.sqlite)
+          git add -- "${public_files[@]}"
+          if git diff --cached --quiet -- "${public_files[@]}"; then
             echo 'The public export has not changed.'
             exit 0
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git commit -m 'chore(data): refresh UniClubs events [skip ci]' --only -- data/public/uniclubs_events.json
+          git commit -m 'chore(data): refresh [skip ci]' --only -- "${public_files[@]}"
           # A racing change to the branch causes a safe failure; never force-push.
           git push origin "HEAD:${DEFAULT_BRANCH}"

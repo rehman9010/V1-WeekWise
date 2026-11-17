@@ -1,4 +1,4 @@
-<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-17, spring 2027 extension, SPEC.md v1.0; review pending -->
+<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-17; sport extension and UniClubs SQLite handoff; review pending -->
 # WeekWise
 
 WeekWise helps HSG students fit sport, leisure and career activities around classes and private
@@ -301,11 +301,11 @@ The first import saved 49 events from 23 clubs; repeated live syncs preserved th
 See [UNICLUBS_TASK_4.md](UNICLUBS_TASK_4.md) for current behavior and
 [UNICLUBS_TASK_3.md](UNICLUBS_TASK_3.md) for the historical first-import results.
 
-The generated SQLite file is ignored by Git. Task 5 adds the durable public snapshot
+The local working file is ignored by Git. Task 5 adds the durable public snapshot
 `data/public/uniclubs_events.json` and `.github/workflows/uniclubs-sync.yml`. The workflow runs
 on the default branch at minutes 17 and 47 of each UTC hour, or through Actions →
 **UniClubs public catalog → Run workflow**. It restores the previous snapshot into a fresh
-SQLite catalog, verifies the source, and commits only the public JSON. No manual token is needed;
+SQLite catalog, verifies the source, and publishes JSON plus the maintained SQLite file. No token is needed;
 the workflow uses GitHub's automatic `GITHUB_TOKEN` with job-scoped contents-write permission.
 The workflow must be present on the default branch and allowed by repository settings to run.
 
@@ -318,6 +318,13 @@ To refresh the public export locally using the existing catalog:
 The JSON contains only public club/event fields, identities, observation times and missing-source
 markers. It retains known history; it contains no profiles, private calendars, descriptions,
 images, access codes or import-log history. A malformed existing snapshot stops the refresh.
+For a SQLite handoff, download [the maintained UniClubs file](data/public/uniclubs.sqlite).
+The scheduled publisher updates it together with the feed after a successful source check,
+using the same public fields. A downloaded file is the data at that moment; download the same
+link again to receive a later version. To use the file as this checkout's separate catalog,
+close the app and copy it to `data/uniclubs.sqlite`. Keep local personal plans in
+`data/private/uniclubs_user.sqlite`. The timetable of future events follows the source's
+published listings; UniClubs dates are not extrapolated from sport training patterns.
 See [UNICLUBS_TASK_5.md](UNICLUBS_TASK_5.md) for recovery, verification and activation status.
 Streamlit now reads this feed into the separate catalog before rendering the week. The sidebar
 shows the publisher's source time separately from the last download check. An open session checks

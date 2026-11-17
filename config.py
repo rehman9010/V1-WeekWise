@@ -34,6 +34,7 @@ DB_FILE = Path(os.environ.get('WEEKWISE_DB_FILE', DEFAULT_DB_FILE))
 PUBLIC_UNISPORT_SEED = DATA_DIR / 'public' / 'unisport_starter.sqlite'
 UNICLUBS_DB_FILE = DATA_DIR / 'uniclubs.sqlite'
 UNICLUBS_EXPORT_FILE = DATA_DIR / 'public' / 'uniclubs_events.json'
+UNICLUBS_SQLITE = DATA_DIR / 'public' / 'uniclubs.sqlite'
 UNICLUBS_MAX_EXPORT_RECORDS = 50000
 UNICLUBS_MAX_EXPORT_BYTES = 50000000
 UNICLUBS_BASE_URL = 'https://uniclubs.ch'
