@@ -1,4 +1,4 @@
-<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-16, Task 7 combined source integration, SPEC.md v1.0; review pending -->
+<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-17, spring 2027 extension, SPEC.md v1.0; review pending -->
 # WeekWise study guide – through M8
 
 ## Separate UniClubs catalog – Task 2 (2026-11-15)
@@ -522,8 +522,9 @@ historical row even when the observation window moves. No individual preferences
 ratings are inferred from aggregate participant counts.
 
 This is a transparent recurrence rule, not a newly trained ML model. The app's
-existing recommender remains separate. Predictions are limited to four future weeks
-per explicit run and are not facts about holidays, cancellations, duration or location.
+existing recommender remains separate. The original default predicts four future weeks;
+the explicit `--until` option now permits the bounded longer horizon described below.
+Neither form supplies facts about holidays, cancellations, duration or location.
 
 The event-table upgrade is technical compatibility work required by the approved
 Task 2 design. SQLite cannot extend this CHECK with a simple ADD COLUMN: migration
@@ -619,8 +620,9 @@ commit. Existing demo files remain separate; equal integer IDs are not proof tha
 catalogues represent the same event. UniClubs already uses namespaced IDs and keeps its
 private owner token separately. Both source paths are retained after the merge.
 
-The published catalogue has a fixed 16 Nov–13 Dec horizon. A new upload is not a new
-website observation, recurrence calculation or proof of free places. Read check times
+The original Task 7 catalogue had a fixed 16 Nov–13 Dec horizon; the spring extension
+below adds dates through 31 July 2027. A new upload is not a new website observation
+or proof of free places. Read check times
 and provenance rather than inferring freshness from a Git commit date. The manifest
 checksum verifies file identity; it does not turn projections into verified dates.
 
@@ -628,3 +630,40 @@ checksum verifies file identity; it does not turn projections into verified date
 public starter, not an ORM or a newly claimed taught query pattern. Regular data reads
 and changes still use the course's explicit SQL. The four acceptance commands run in
 temporary files and preserve the original seed and private working sources.
+
+
+## Spring 2027: extend a bounded forecast and preserve a working catalogue
+
+| File / function | What to study | Course connection |
+| --- | --- | --- |
+| `training_forecast._forecast_window`, `_forecast_slots` | Inclusive last date, exclusive internal boundary, incomplete final week | A06: datetime/timedelta; L03: bounded loops |
+| `_check_catalogue_capacity` | Count existing and missing dated identities before writes | A07: SELECT/COUNT, parameter binding; L04: tuple keys |
+| `generate_training_forecast` | Append missing rows while retaining existing IDs and proofs | A07: PK/FK, transactions |
+| `starter_catalogue.bootstrap_starter` and its upgrade helpers | Recognize a known source lineage, validate identities, append atomically | A07: keys, constraints, INSERT, transactions |
+| `views/check_starter.py`, `starter_scenario.py` | Compare manifest with the actual shipped data and browse the later calendar | A07/A08: data checks; L04: dictionaries; integration testing |
+
+An inclusive `--until 2027-07-31` is represented internally by an exclusive next-day
+boundary. Only generated starts before that boundary enter the database. The original
+four-week default remains. A separate 366-day/20,000-event forecast bound supports the
+longer horizon while retaining the existing 5,000-row legacy import safeguard.
+
+The database already contains evidence for January–November 2026, but this simple rule
+uses its latest 28-day window: 10 October–6 November. Repeating those 263 weekly patterns
+does not infer spring/summer timetable changes, holiday closures, or course continuity.
+Longer projections retain `projected` provenance; only an exact dated official match
+can establish website evidence. Historical participation counts are not user ratings
+and the recurrence extension is not the project's trained machine-learning model.
+
+Rebuilding a larger forecast from an empty database would shift IDs because insertion
+order groups dates by pattern. Extending the existing catalogue from 14 December
+preserves the original course/event references. The runtime upgrade checks that the
+incoming starter contains the known original public prefix and that local IDs still
+refer to the same courses and dated starts. It preserves old course fields, event
+fields, proofs, profiles, favorites and independent UniClubs owner mappings. New-event
+PK or unique-slot collisions reject the whole upgrade. The catalogue identity changes
+only after successful insertions, so old cache keys cannot represent the extended data.
+
+`BEGIN IMMEDIATE` is a narrowly scoped SQLite locking detail for competing startup
+processes; content fingerprints use the already documented `hashlib` helper. These are
+technical compatibility tools, not extra course exercises. Normal data operations stay
+with explicit parameterized SQL. No dependency, ORM or runtime AI service is added.

@@ -1,4 +1,4 @@
-<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-16, Task 7 combined source integration, SPEC.md v1.0; review pending -->
+<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-17, spring 2027 extension, SPEC.md v1.0; review pending -->
 # WeekWise
 
 WeekWise helps HSG students fit sport, leisure and career activities around classes and private
@@ -6,12 +6,17 @@ appointments. Offers are spread across different sources; manually comparing eve
 a calendar takes time. WeekWise finds free gaps, ranks suitable activities, exports confirmed
 plans and learns from attendance feedback.
 
-This checkout includes the reviewed **Unisport starter: 1,052 dates for 16 Nov–13 Dec 2026**,
-with 967 website checks and 85 labelled projections, plus the independent UniClubs public feed.
-The starter's website evidence was checked on 15 November; uploading it does not refresh availability.
+This checkout includes the reviewed **Unisport starter for 16 Nov 2026–31 Jul 2027**,
+with **9,731 dates: 1,551 website-evidenced and 8,180 explicitly labelled projections**,
+plus the independent UniClubs public feed. Website evidence was checked on 15 and 17 November;
+the latest exact evidenced appointment is 20 February 2027. Exact counts, file hash and coverage are in the
+[public manifest](data/public/unisport_manifest.json). A saved check or an upload does not
+refresh availability. Longer forecasts reuse historical weekly patterns; seasonal timetable
+changes and holidays are not learned from those patterns.
 The existing calendar, planning, ML/feedback, local API, rankings and friends features remain.
 See [PUBLIC_STARTER_GUIDE.md](PUBLIC_STARTER_GUIDE.md) for the German operating guide and
-[TASK7_REPORT.md](TASK7_REPORT.md) for publication checks. External Google/Outlook account
+[SPRING_2027_REPORT.md](SPRING_2027_REPORT.md) for extension checks. The earlier
+[TASK7_REPORT.md](TASK7_REPORT.md) records the original four-week publication. External Google/Outlook account
 verification remains a separate manual check.
 The interface uses English and Europe/Zurich local time.
 
@@ -50,6 +55,10 @@ private Excel, CSV or historical archive. The starter has no profiles or individ
 Source labels and verification details are visible; unknown availability disables confirmation.
 UniClubs keeps its own catalogue and private plans. Its checked-in public snapshot supports
 offline startup when a feed refresh is unavailable. Restarting preserves your working data.
+An existing original reviewed sport catalogue receives the added dates on startup through a
+validated append-only upgrade. Profiles, favorites, saved plans, manual course/event changes
+and existing provenance remain in the working file. Conflicting identities prevent the upgrade;
+an unrelated or demo database is not replaced.
 
 The new working filename keeps an existing `data/weekwise.sqlite` unchanged. It does not migrate
 old demo confirmations to unrelated real-course IDs; the reviewed catalogue has its own onboarding.
@@ -529,7 +538,7 @@ the last 28 observed days and also occurs in their final seven days. Repeated
 rows or repeated exports do not count as extra evidence. Local course IDs use
 `history-pattern:<earliest historical row ID>`; these are not official Unisport IDs.
 
-The actual archive yields 263 patterns and 1,052 provisional events. Every new event
+The original four-week run yielded 263 patterns and 1,052 provisional events. Every new event
 has `status='unknown'`, `end_is_estimated=1`, location TBA, unknown price and
 `event_provenance.kind='projected'`. The 90-minute duration is the existing explicit
 app fallback, not a duration learned from the export. No future event is called
@@ -613,11 +622,12 @@ python api_server.py
 PowerShell can set the same process variable with
 `$env:WEEKWISE_DB_FILE = "$PWD/data/private/training_app.sqlite"`.
 Both processes read the path at startup. Restart them after changing it.
-The ordinary default remains `data/weekwise.sqlite`; without a prepared catalogue,
-the existing offline demo still starts as before. Local Task 6 prepared both the
-separate preview and the default app database, each with 1,052 dates.
+At the Task 6 checkpoint the ordinary default was `data/weekwise.sqlite`; the
+separate preview and that app database each held 1,052 dates. The published default
+now uses `data/weekwise-reviewed.sqlite` as described above; this section records the
+original local preparation workflow.
 
-The runtime contains **967 website-checked dates and 85 provisional dates**, retaining
+The original Task 6 runtime contained **967 website-checked dates and 85 provisional dates**, retaining
 all occurrence IDs. It contains no historical rows, source-file names, participant
 statistics or copied profiles. Approved public course titles/qualifiers replace source
 labels; 15 unapproved course patterns use a neutral label for their 60 provisional dates.
@@ -654,3 +664,54 @@ The real catalogue has no individual ratings. Existing heuristic suggestions wor
 the separate original demo still trains and uses the existing recommendation model.
 Aggregate participant numbers are not converted into individual preferences or ratings.
 See `TASK6_REPORT.md` for the exact checks. GitHub publication is the separately gated Task 7.
+
+
+## Extend the sport planning horizon through spring 2027
+
+The current public starter covers **16 November 2026–31 July 2027**. HSG lists the spring
+teaching period as **22 February–28 May 2027** and central exams as **21 June–23 July**.
+The full spring semester ends on **31 July** under Article 145 of the academic implementation
+provisions. Sources: [HSG semester dates](https://www.unisg.ch/de/studium/studieren-an-der-hsg/semesterdaten/)
+and [academic provisions, Article 145](https://erlasse.unisg.ch/lexoverview-home/lex-II_A_09/lex-II_A_09.pdf?change-id=357&effective-from=20250201).
+Those academic dates do not prove when individual sports run.
+
+The same transparent recurrence rule still uses the last 28 observed days, ending
+6 November 2026, and requires evidence in at least three distinct weeks including
+the latest observed week. It does not train a seasonal schedule model. A projected
+February or July date is a planning idea until that exact appointment has public website
+evidence; absence from a fetched calendar is not treated as a cancellation. Holidays,
+summer schedules and changed semester times can make these longer projections inaccurate.
+
+For the maintained private archive, the explicit extension command is:
+
+```bash
+python training_forecast.py --start-date 2026-12-14 --until 2027-07-31
+```
+
+`--until` includes the final date, even for an incomplete final week. Omitting it keeps
+the four-week default. This command must run before its selected start Monday and requires
+the private imported history; downloading the public starter does not recreate that archive.
+The extended window is bounded to 366 days and the accumulated sport catalogue to 20,000
+events. The existing 5,000-row legacy import limit remains separate.
+
+Extend the existing archive rather than rebuilding the old forecast from an empty file:
+this retains all original 263 course identities and 1,052 dated event/proof identities.
+Build a separate new public output with the existing selected-field catalogue export.
+The runtime checks the known original catalogue lineage before appending the new events
+and their provenance, then updates the catalogue identity in the same transaction.
+The app/API cache and HTTP dataset header use that identity. This is an explicit uploaded
+snapshot; sport forecasts and source checks do not run automatically on every app start.
+The independent UniClubs feed keeps its existing refresh behavior.
+
+The optional API still accepts at most 120 days per request. Use weekly or monthly ranges
+to read the semester, for example:
+
+```text
+http://127.0.0.1:5001/events?from=2027-07-26&to=2027-08-01
+```
+
+To hand the data to another person, send the public SQLite file and its manifest, or link
+to [the public data folder](https://github.com/rehman9010/V1-WeekWise/tree/main/data/public).
+They can read it with `sqlite3`/SQL directly, or run the repository's existing Flask API.
+See [the German handoff guide](PUBLIC_STARTER_GUIDE.md) and
+[extension verification](SPRING_2027_REPORT.md).

@@ -1,27 +1,39 @@
 {
   "_meta": {
-    "ai_citation": "OpenAI Codex (GPT-6), 2026-11-16, approved Task 7; reviewed by: pending",
-    "prepared_on": "2026-11-16",
-    "website_evidence_checked_on": "2026-11-15",
+    "ai_citation": "OpenAI Codex (GPT-6), 2026-11-17, requested spring-semester extension; reviewed by: pending",
+    "prepared_on": "2026-11-17",
+    "website_evidence_checked_on": [
+      "2026-11-15",
+      "2026-11-17"
+    ],
     "purpose": "Read-only reviewed starter; mutable profiles live in a separate ignored database."
   },
   "file": "unisport_starter.sqlite",
-  "sha256": "c7880899488155214ff78b02630458fcbe6f93a77df3b89bb0e3d6b127d33708",
-  "bytes": 581632,
-  "catalogue_id": "reviewed-4391b9c074a7bcdcb3124e5cca61f34682230d0966481ce4cde1715fb803cf49",
+  "sha256": "f8868c123f6ef4439a46111e10a013f7de9aa852970f55f2e51843c517da4d42",
+  "bytes": 1941504,
+  "catalogue_id": "reviewed-4e8df95158dce44c588057f2636b07cd45a6ede196b41292ac1571ef542ad6da",
+  "previous_catalogue_id": "reviewed-4391b9c074a7bcdcb3124e5cca61f34682230d0966481ce4cde1715fb803cf49",
   "first_date": "2026-11-16",
-  "last_date_inclusive": "2026-12-13",
+  "last_date_inclusive": "2027-07-31",
   "counts": {
     "series": 263,
-    "events": 1052,
-    "website": 967,
-    "projected": 85,
+    "events": 9731,
+    "website": 1551,
+    "projected": 8180,
     "masked_series": 15,
-    "masked_projected_events": 60,
+    "masked_projected_events": 555,
     "private_archive_rows": 0,
     "copied_user_profiles": 0
   },
   "availability": "unknown",
   "prices_and_locations": "unknown",
-  "private_source_files_included": false
+  "private_source_files_included": false,
+  "forecast": {
+    "historical_anchor": "2026-11-06",
+    "lookback_weeks": 4,
+    "minimum_evidence_weeks": 3,
+    "method": "Repeat qualifying weekly patterns; no seasonal or holiday model.",
+    "end_is_estimated_unless_website_verified": true,
+    "automatic_sport_refresh": false
+  }
 }
