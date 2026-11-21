@@ -1,0 +1,5 @@
+# AI CITATION: OpenAI Codex (GPT-6), 2026-11-21; public API deployment; review pending
+# The existing pinned project dependencies remain shared with Streamlit.
+-r requirements.txt
+# Linux WSGI runner for Render; technical hosting support, not a course algorithm.
+gunicorn==27.0.1

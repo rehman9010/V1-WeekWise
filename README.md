@@ -1,4 +1,4 @@
-<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-17; sport extension and UniClubs SQLite handoff; review pending -->
+<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-21; public SQLite API deployment; review pending -->
 # WeekWise
 
 WeekWise helps HSG students fit sport, leisure and career activities around classes and private
@@ -722,3 +722,24 @@ to [the public data folder](https://github.com/rehman9010/V1-WeekWise/tree/main/
 They can read it with `sqlite3`/SQL directly, or run the repository's existing Flask API.
 See [the German handoff guide](PUBLIC_STARTER_GUIDE.md) and
 [extension verification](SPRING_2027_REPORT.md).
+
+## Public read-only API for both SQLite sources
+
+`api_server.create_public_app()` exposes separate `/unisport/events` and
+`/uniclubs/events` routes backed by SQL reads, with required `from`/`to` date filters
+covering at most 120 days. The two IDs remain source-specific. `/health` and `/sources`
+report public source availability and freshness. This is a separate public application;
+the existing local Streamlit/API behavior remains available.
+
+`render.yaml` prepares one Free Python 3.11 Render web service. Its startup command calls
+the public factory through Gunicorn, using one worker and one synchronous request thread.
+`requirements-api.txt` reuses the project's pinned requirements and adds Gunicorn only for
+this Linux hosting step. Flask and Gunicorn are technical server additions, not claimed
+as taught database material. SQL/SQLite and HTTP/JSON remain the course-based data path.
+
+No public server URL exists until the owner connects a Render account and deploys the
+prepared Blueprint. Use [the German setup and API guide](PUBLIC_API_GUIDE.md) for the
+exact account steps, client examples, response dates and source-update behavior.
+Render Free instances may sleep and lose local file changes; public data remains in
+GitHub, and the UniClubs read cache is recoverable. No private user database belongs in
+the public service. The separate Streamlit deployment continues to use `app.py`.

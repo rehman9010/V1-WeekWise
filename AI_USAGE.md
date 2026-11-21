@@ -1,4 +1,4 @@
-<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-17; sport extension; review pending -->
+<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-21; public API and deployment; review pending -->
 # AI usage record
 
 | Date | Tool/model | Purpose | Output/files | Checks and team review |
@@ -29,6 +29,8 @@
 | 2026-11-16 | OpenAI Codex (GPT-6), approved Unisport Task 7 | Publish the cleaned sport starter and integrate current UniClubs work | Public SQLite/manifest, `starter_catalogue.py`, startup/config/reset/cache integration, bootstrap tests, combined acceptance runner, workflow and German guide/report | Independent field/privacy audit; 1,052 dates with 967/85 provenance and no source archive/users. 492 local tests and all four app scenarios; source/seed unchanged. Preserved the latest UniClubs feed/plans/workflow. GitHub checks are inspected after publication; no live Streamlit result is presumed without its URL. Team review pending. |
 | 2026-11-17 | OpenAI Codex (GPT-6), approved spring-semester extension | Extend the sport planning horizon through 31 July 2027 and update existing reviewed working files safely | Forecast bounds/CLI, selected-field export, starter upgrade, public SQLite/manifest, upgrade and acceptance tests, README, German handoff guide, study guide and extension report | 9,731 public dates: 1,551 website/8,180 projected, same 263 historical weekly patterns; original 1,052 event/proof identities retained. 584 added dates exactly verified from public responses checked on 17 November; no seasonal model or invented availability. Existing profile/manual fields and UniClubs ownership remain protected. Final counts and verification are recorded in SPRING_2027_REPORT.md. Team review pending. |
 | 2026-11-17 | OpenAI Codex (GPT-6) | Provide the maintained UniClubs SQLite handoff alongside its public JSON feed | Export, refresh, workflow and tests; README and study guide | Public-field rebuild preserves identities. Verification follows the export tests. Team review pending. |
+
+| 2026-11-21 | OpenAI Codex (GPT-6), public API and hosting preparation | Prepare separate read-only SQL access to the public UniSPORT and UniClubs catalogs and a Render setup | Public API factory/data helper and tests; `render.yaml`, `requirements-api.txt`, German API guide and study documentation | Existing local API and Streamlit flows retained; verification results are recorded at release. Gunicorn is an explicitly documented Linux hosting helper, not claimed course material. No public URL or completed Render account connection is presumed. Team review pending. |
 
 The citation headers identify the actual coding agent as OpenAI Codex (GPT-6), rather than
 copying the Anthropic name in the specification's example. No team review is claimed: headers

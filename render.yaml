@@ -1,0 +1,24 @@
+# AI CITATION: OpenAI Codex (GPT-6), 2026-11-21; public read-only API; review pending
+services:
+  - type: web
+    name: weekwise-public-api
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements-api.txt
+    startCommand: >-
+      gunicorn 'api_server:create_public_app()'
+      --bind 0.0.0.0:$PORT --workers 1 --threads 1 --timeout 60
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.18
+      - key: MPLBACKEND
+        value: Agg
+      - key: MPLCONFIGDIR
+        value: /tmp/weekwise-mpl
+      - key: XDG_CACHE_HOME
+        value: /tmp/weekwise-cache
+    buildFilter:
+      ignoredPaths:
+        - data/public/uniclubs_events.json
+        - data/public/uniclubs.sqlite

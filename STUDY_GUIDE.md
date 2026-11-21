@@ -1,4 +1,4 @@
-<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-17; sport extension and UniClubs export; review pending -->
+<!-- AI CITATION: OpenAI Codex (GPT-6), updated 2026-11-21; public API and deployment; review pending -->
 # WeekWise study guide – through M8
 
 ## Separate UniClubs catalog – Task 2 (2026-11-15)
@@ -672,3 +672,23 @@ only after successful insertions, so old cache keys cannot represent the extende
 processes; content fingerprints use the already documented `hashlib` helper. These are
 technical compatibility tools, not extra course exercises. Normal data operations stay
 with explicit parameterized SQL. No dependency, ORM or runtime AI service is added.
+
+## Public API: query both real SQLite sources
+
+| File / function | What to study | Course connection |
+| --- | --- | --- |
+| `api_server.create_public_app` | Separate public read routes and JSON responses | A06/L06: HTTP methods, paths, status codes, JSON |
+| Public sport and club event queries | Date-bound `SELECT`/`JOIN` with bound values, separate identities | A07: SQLite, SQL, primary/foreign keys |
+| Public source freshness/cache helper | Keep a usable last observation when a download fails | A06: requests, timeout and error handling; L03/L04: conditions and dictionaries |
+| `PUBLIC_API_GUIDE.md` client example | Request a bounded date interval and inspect returned records | A06: `requests.get`, parameters and JSON |
+
+The SQL queries are the evidence that both data sources remain databases. JSON is the
+response format for another program. Club UTC source timestamps remain distinct from
+the app's naive Europe/Zurich sport timestamps; query dates refer to Zurich local days.
+
+`render.yaml` and the separate `requirements-api.txt` concern deployment rather than
+database algorithms. Flask was already an accepted technical addition. Gunicorn is the
+Linux WSGI runner used to host that application on Render, not a claimed course topic.
+One worker and one request thread keep cache ownership simple without new app schedulers.
+The Streamlit dependency file remains unchanged. The source owner still has to create
+and connect the Render account before any public URL is available.
