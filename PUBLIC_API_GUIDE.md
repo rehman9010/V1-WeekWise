@@ -8,8 +8,10 @@ Die bisherige lokale App-API bleibt separat verfügbar.
 
 ## Einmalig auf Render starten
 
-Die Konfiguration ist vorbereitet. Es ist noch kein öffentlicher API-Server angelegt
-und es gibt noch keine bestätigte öffentliche Basisadresse.
+Der öffentliche Dienst ist unter <https://weekwise-public-api.onrender.com> erreichbar.
+Am 21.11.2026 wurden beide Datenquellen per HTTP erfolgreich geprüft; der UniClubs-Abruf
+hat dabei einen neueren Quellenstand übernommen. Die folgenden Schritte dienen einer
+erneuten Einrichtung oder einer weiteren Instanz.
 
 Direkt zur Einrichtung:
 [Render mit diesem Repository öffnen](https://render.com/deploy?repo=https://github.com/rehman9010/V1-WeekWise).
@@ -22,9 +24,8 @@ Direkt zur Einrichtung:
 5. Bereitstellung starten. Nach dem erfolgreichen Start die im Dashboard angezeigte
    öffentliche Service-URL kopieren und `/health` öffnen.
 
-Die exakte URL wird von Render vergeben. In den folgenden Beispielen ist
-`DEINE_RENDER_URL` ausdrücklich ein Platzhalter; er muss durch diese URL ersetzt werden.
-Ein möglicherweise anders belegter Servicename ist kein Beleg für eine vorhandene API.
+Die Beispiele verwenden die bestätigte Basisadresse `https://weekwise-public-api.onrender.com`.
+Für eine weitere Instanz muss sie durch deren eigene Render-Adresse ersetzt werden.
 
 Falls Render stattdessen manuell als **New → Web Service** eingerichtet wird:
 
@@ -49,8 +50,8 @@ nicht in diesen öffentlichen Dienst kopiert werden.
 Beispiel für eine Woche, jeweils mit einschließlich `from` und ausschließlich `to`:
 
 ```text
-DEINE_RENDER_URL/unisport/events?from=2027-02-01&to=2027-02-08
-DEINE_RENDER_URL/uniclubs/events?from=2027-02-01&to=2027-02-08
+https://weekwise-public-api.onrender.com/unisport/events?from=2027-02-01&to=2027-02-08
+https://weekwise-public-api.onrender.com/uniclubs/events?from=2027-02-01&to=2027-02-08
 ```
 
 Die Datumsangaben gelten für **Europe/Zurich**. Ein Zeitraum muss 1 bis 120 Tage
@@ -72,7 +73,7 @@ Ein Teammate kann die Daten mit dem aus dem Kurs bekannten `requests` abrufen:
 ```python
 import requests
 
-basis = 'https://DEINE_RENDER_ADRESSE'
+basis = 'https://weekwise-public-api.onrender.com'
 antwort = requests.get(
     basis + '/unisport/events',
     params={'from': '2027-02-01', 'to': '2027-02-08'},
