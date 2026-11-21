@@ -737,9 +737,10 @@ the public factory through Gunicorn, using one worker and one synchronous reques
 this Linux hosting step. Flask and Gunicorn are technical server additions, not claimed
 as taught database material. SQL/SQLite and HTTP/JSON remain the course-based data path.
 
-No public server URL exists until the owner connects a Render account and deploys the
-prepared Blueprint. Use [the German setup and API guide](PUBLIC_API_GUIDE.md) for the
-exact account steps, client examples, response dates and source-update behavior.
+The public server is live at <https://weekwise-public-api.onrender.com>.
+Both SQLite-backed event endpoints and live UniClubs refresh were verified over HTTP
+on 21 November 2026. Use [the German setup and API guide](PUBLIC_API_GUIDE.md) for the
+working URLs, client examples, response dates and source-update behavior.
 Render Free instances may sleep and lose local file changes; public data remains in
 GitHub, and the UniClubs read cache is recoverable. No private user database belongs in
 the public service. The separate Streamlit deployment continues to use `app.py`.
